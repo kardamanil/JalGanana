@@ -5,12 +5,14 @@ let baseLabNo = null;
 let thCount = 0;
 let chlCount = 0;
 let alkCount = 0;
-let tdsCount = 0;
 
 // Previous readings
 let prevTH = 0.0;
 let prevChl = 0.0;
 let prevAlk = 0.0;
+
+// Store readings per lab_no
+let labData = {};
 
 // Apply base lab no
 function applyLabNo() {
@@ -21,7 +23,8 @@ function applyLabNo() {
     return;
   }
   baseLabNo = input;
-  thCount = chlCount = alkCount = tdsCount = 0; // Reset counters
+  thCount = chlCount = alkCount = 0; // Reset counters
+  labData = {}; // Reset data
   alert("Base Lab No applied: " + baseLabNo);
 }
 
@@ -36,7 +39,6 @@ function getLabNo(calcType) {
   if (calcType === "th") count = thCount;
   else if (calcType === "chl") count = chlCount;
   else if (calcType === "alk") count = alkCount;
-  else if (calcType === "tds") count = tdsCount;
 
   return (num + count) + "/" + year;
 }
@@ -46,7 +48,6 @@ function incrementCount(calcType) {
   if (calcType === "th") thCount++;
   else if (calcType === "chl") chlCount++;
   else if (calcType === "alk") alkCount++;
-  else if (calcType === "tds") tdsCount++;
 }
 
 // TH–Ca–Mg Calculator
@@ -67,6 +68,13 @@ function calcTH() {
   const Ca = Math.round(CaV * 16);
   const Mg = Math.round(MgV * 9.6);
 
+  // Update labData
+  if (!labData[labNo]) labData[labNo] = {};
+  labData[labNo].th_v = THv; labData[labNo].th = TH;
+  labData[labNo].ca_v = CaV; labData[labNo].ca = Ca;
+  labData[labNo].mg_v = MgV; labData[labNo].mg = Mg;
+
+  // Append row
   const row = document.createElement("tr");
   row.innerHTML = `<td>${labNo}</td><td>${THv.toFixed(1)}</td><td>${TH}</td>
                    <td>${CaV.toFixed(1)}</td><td>${Ca}</td><td>${MgV.toFixed(1)}</td><td>${Mg}</td>`;
@@ -77,6 +85,8 @@ function calcTH() {
   document.getElementById("th_new").value = "";
 
   incrementCount("th");
+
+  updateTDS(labNo);
 }
 
 // Chloride Calculator
@@ -92,6 +102,10 @@ function calcChloride() {
 
   const Chl = Math.round(ChlV * 40);
 
+  // Update labData
+  if (!labData[labNo]) labData[labNo] = {};
+  labData[labNo].chl_v = ChlV; labData[labNo].chl = Chl;
+
   const row = document.createElement("tr");
   row.innerHTML = `<td>${labNo}</td><td>${ChlV.toFixed(1)}</td><td>${Chl}</td>`;
   document.getElementById("chl_table").appendChild(row);
@@ -101,6 +115,8 @@ function calcChloride() {
   document.getElementById("chl_new").value = "";
 
   incrementCount("chl");
+
+  updateTDS(labNo);
 }
 
 // Alkalinity Calculator
@@ -116,6 +132,10 @@ function calcAlkalinity() {
 
   const Alk = Math.round(AlkV * 200);
 
+  // Update labData
+  if (!labData[labNo]) labData[labNo] = {};
+  labData[labNo].alk_v = AlkV; labData[labNo].alk = Alk;
+
   const row = document.createElement("tr");
   row.innerHTML = `<td>${labNo}</td><td>${AlkV.toFixed(1)}</td><td>${Alk}</td>`;
   document.getElementById("alk_table").appendChild(row);
@@ -125,22 +145,26 @@ function calcAlkalinity() {
   document.getElementById("alk_new").value = "";
 
   incrementCount("alk");
+
+  updateTDS(labNo);
 }
 
-// TDS Calculator
-function calcTDS() {
-  const labNo = getLabNo("tds");
-  if (!labNo) { alert("Apply Base Lab No first!"); return; }
+// TDS auto-update per lab_no
+function updateTDS(labNo) {
+  const data = labData[labNo];
+  if (data && data.th !== undefined && data.chl !== undefined && data.alk !== undefined) {
+    const TDS = data.th + data.chl + data.alk;
+    data.tds = TDS;
 
-  const TH = parseInt(document.querySelector("#th_table tr:last-child td:nth-child(3)")?.innerText || 0);
-  const Chl = parseInt(document.querySelector("#chl_table tr:last-child td:nth-child(3)")?.innerText || 0);
-  const Alk = parseInt(document.querySelector("#alk_table tr:last-child td:nth-child(3)")?.innerText || 0);
-
-  const TDS = TH + Chl + Alk;
-
-  const row = document.createElement("tr");
-  row.innerHTML = `<td>${labNo}</td><td>${TDS}</td>`;
-  document.getElementById("tds_table").appendChild(row);
-
-  incrementCount("tds");
+    // Check if row already exists
+    let tdsTable = document.getElementById("tds_table");
+    let existingRow = Array.from(tdsTable.rows).find(r => r.cells[0].innerText === labNo);
+    if (existingRow) {
+      existingRow.cells[1].innerText = TDS;
+    } else {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${labNo}</td><td>${TDS}</td>`;
+      tdsTable.appendChild(row);
+    }
+  }
 }
