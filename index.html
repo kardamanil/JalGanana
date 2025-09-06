@@ -88,10 +88,12 @@
     </table>
   </div>
   <!-- Firebase & Firestore Initialization -->
-  <script type="module">
+   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+  // Firebase config (aapka project ka details)
     const firebaseConfig = {
       apiKey: "AIzaSyDSqffmlg33rpMc6a2JUddg9pYQFvR8aXU",
       authDomain: "labcalc-cee5c.firebaseapp.com",
@@ -101,10 +103,12 @@
       messagingSenderId: "1030109019271",
       appId: "1:1030109019271:web:e66f263a8a1c003b41cc22"
     };
-
+// Firebase initialize
     const app = initializeApp(firebaseConfig);
+// Firestore initialize     
     const db = getFirestore(app);
-    window.__fb = { db }; // expose for script.js usage
+// Ab db ready hai use karne ke liye
+     window.__fb = { db }; // expose for script.js usage
     console.log("✅ Firestore initialized", db);
   </script>
 
