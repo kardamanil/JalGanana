@@ -1,5 +1,4 @@
-let currentLabNo = "";
-
+let currentLabNo = "";  // Shared Lab No
 let prevTH = 0, prevChl = 0, prevAlk = 0;
 
 // ---------------- Lab No ----------------
@@ -14,13 +13,12 @@ function applyLabNo() {
   alert("Applied Lab No: " + currentLabNo);
 }
 
-function nextLabNo() {
-  if (!currentLabNo) { alert("Apply Lab No first"); return; }
+function incrementLabNo() {
+  if (!currentLabNo) return;
   let [num, year] = currentLabNo.split("/");
   num = parseInt(num) + 1;
   currentLabNo = num + "/" + year;
   document.getElementById("lab_no").value = currentLabNo;
-  alert("Next Lab No: " + currentLabNo);
 }
 
 // ---------------- TH–Ca–Mg ----------------
@@ -51,6 +49,8 @@ function calcTH() {
   prevTH = newVal;
   document.getElementById("th_prev_set").placeholder = prevTH.toFixed(1);
   document.getElementById("th_new").value = "";
+
+  incrementLabNo();  // Auto-increment Lab No after TH
 }
 
 // ---------------- Chloride ----------------
@@ -72,6 +72,8 @@ function calcChloride() {
   prevChl = newVal;
   document.getElementById("chl_prev_set").placeholder = prevChl.toFixed(1);
   document.getElementById("chl_new").value = "";
+
+  incrementLabNo(); // Auto-increment Lab No after Cl
 }
 
 // ---------------- Alkalinity ----------------
@@ -93,6 +95,8 @@ function calcAlkalinity() {
   prevAlk = newVal;
   document.getElementById("alk_prev_set").placeholder = prevAlk.toFixed(1);
   document.getElementById("alk_new").value = "";
+
+  incrementLabNo(); // Auto-increment Lab No after Alk
 }
 
 // ---------------- TDS ----------------
@@ -119,4 +123,6 @@ function calcTDS() {
     <td>${TDS.toFixed(1)}</td>
   </tr>`;
   document.getElementById("tds_table").innerHTML += row;
+
+  incrementLabNo(); // Auto-increment Lab No after TDS
 }
