@@ -1,123 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Titration Calculator by KARDAM</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Water Calculations – PWA (Step 1: index.html)</title>
   <style>
-    body { font-family: Arial, sans-serif; }
-    section { margin-bottom: 30px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    /* Next reading inputs का color अलग */
-    .next-reading { background-color: #e6f3ff; /* light blue */ border: 1px solid #007bff; }
+    :root{
+      /* Next (नया) reading/volume fields के लिए रंग */
+      --next-bg: #fff9db;        /* pale yellow */
+      --next-border: #f59e0b;    /* amber */
+      --accent: #2563eb;         /* blue */
+      --ok: #16a34a;             /* green */
+      --warn: #b45309;           /* brown/amber */
+      --danger: #dc2626;         /* red */
+      --bg: #f7fafc;             /* light page bg */
+      --card: #ffffff;           /* card bg */
+      --text: #111827;           /* text */
+      --muted: #6b7280;          /* muted text */
+      --table-border: #e5e7eb;   /* light border */
+    }
+
+    * { box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container{ max-width: 1200px; margin: 0 auto; }
+    h1{ margin: 0 0 8px 0; font-size: 22px; }
+    .subtitle{ color: var(--muted); margin-bottom: 20px; font-size: 14px; }
+
+    .grid{ display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 960px){ .grid{ grid-template-columns: 1fr 1fr; } }
+
+    .card{
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      padding: 16px;
+    }
+    .card h2{ margin: 0 0 12px 0; font-size: 18px; }
+    .card h3{ margin: 0 0 10px 0; font-size: 16px; }
+
+    .row{ display: grid; grid-template-columns: 160px 1fr 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .row label{ font-size: 14px; color: var(--muted); }
+
+    input[type="text"], input[type="number"]{
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+    input[type="text"]:focus, input[type="number"]:focus{ border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+
+    /* नया/next reading fields highlight */
+    .next-input{ background: var(--next-bg); border: 2px solid var(--next-border); }
+
+    .controls{ display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    button{
+      padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600;
+      background: var(--accent); color: #fff; transition: transform .04s ease;
+    }
+    button.secondary{ background: #334155; }
+    button.ghost{ background: #e5e7eb; color: #111827; }
+    button:active{ transform: translateY(1px); }
+
+    .status{ font-size: 13px; color: var(--muted); }
+    .status.error{ color: var(--danger); font-weight: 600; }
+    .status.ok{ color: var(--ok); font-weight: 600; }
+
+    .legend{ font-size: 12px; color: var(--muted); display: flex; gap: 10px; align-items: center; }
+    .swatch{ width: 14px; height: 14px; border-radius: 4px; display: inline-block; border: 1px solid #c9b07a; background: var(--next-bg); box-shadow: inset 0 0 0 2px var(--next-border); }
+
+    table{ width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--table-border); border-radius: 10px; overflow: hidden; }
+    thead{ background: #f3f4f6; }
+    th, td{ text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--table-border); font-size: 14px; }
+    tbody tr:nth-child(even){ background: #fafafa; }
+
+    .hidden{ display: none !important; }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Water Calculations</h1>
+    <div class="subtitle">Step 1 (index.html layout & styling)। अगला step में logic (script.js), फिर Firebase/Firestore, फिर PWA.</div>
 
-  <h1>Titration Calculator by KARDAM</h1>
+    <!-- Shared Lab Number -->
+    <div class="card">
+      <h2>Shared Lab Number</h2>
+      <div class="row">
+        <label for="lab_start">Starting Lab No (x/yyyy → xxxx/yyyy)</label>
+        <input id="lab_start" type="text" inputmode="numeric" placeholder="e.g., 25/2025" />
+        <div class="controls">
+          <button id="btn-apply-lab" title="Apply lab no">Apply</button>
+          <button id="btn-next-lab" class="secondary" title="Increment number part">Next</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="swatch"></span>
+        <span>Highlighted = Next/नया reading/volume inputs</span>
+      </div>
+      <div id="lab_status" class="status">Format: x/yyyy, xx/yyyy, xxx/yyyy, or xxxx/yyyy</div>
+    </div>
 
-  <!-- Shared Starting Lab No -->
-  <section>
-    <h3>Starting Lab No (format: xx/yyyy)</h3>
-    <input id="lab_start" placeholder="e.g., 25/2025">
-  </section>
+    <!-- Inputs Panel: Previous vs Next (highlighted) -->
+    <div class="grid">
+      <div class="card">
+        <h2>Inputs – Readings/Volumes</h2>
+        <h3>TH – Ca – Mg</h3>
+        <div class="row">
+          <label for="th_prev_set">TH Previous Set</label>
+          <input id="th_prev_set" type="number" step="0.01" placeholder="e.g., 0.5" />
+          <input id="th_new" class="next-input" type="number" step="0.01" placeholder="TH Next (new)" />
+        </div>
 
-  <!-- Fetch Data by Lab No -->
-  <section>
-    <h3>Fetch Data by Lab No</h3>
-    <input id="fetch_lab_no" placeholder="e.g., 25/2025">
-    <button id="btn-fetch-data">Fetch</button>
-  </section>
+        <h3>Chloride</h3>
+        <div class="row">
+          <label for="chl_prev_set">Chl Previous Set</label>
+          <input id="chl_prev_set" type="number" step="0.01" placeholder="e.g., 0.5" />
+          <input id="chl_new" class="next-input" type="number" step="0.01" placeholder="Chl Next (new)" />
+        </div>
 
-  <!-- TH–Ca–Mg Calculator -->
-  <section>
-    <h2>TH–Ca–Mg Calculator</h2>
-    <label>Enter New Reading (R)</label>
-    <input id="th_new" class="next-reading">
-    <button id="btn-calc-th">Calculate</button>
+        <h3>Alkalinity</h3>
+        <div class="row">
+          <label for="alk_prev_set">Alk Previous Set</label>
+          <input id="alk_prev_set" type="number" step="0.01" placeholder="e.g., 0.5" />
+          <input id="alk_new" class="next-input" type="number" step="0.01" placeholder="Alk Next (new)" />
+        </div>
+      </div>
 
-    <label>Set Previous Reading (P)</label>
-    <input id="th_prev_set">
-    <button id="btn-set-th">Update P</button>
+      <div class="card">
+        <h2>Fetch by Lab No (Future: Firestore)</h2>
+        <div class="row">
+          <label for="fetch_lab_no">Lab No to Fetch</label>
+          <input id="fetch_lab_no" type="text" inputmode="numeric" placeholder="e.g., 25/2025" />
+          <div class="controls">
+            <button id="btn-fetch-data" class="ghost" title="Fetch from DB">Fetch</button>
+          </div>
+        </div>
+        <div class="status">यह फंक्शन अगले steps (Firestore) में सक्षम होगा।</div>
+      </div>
+    </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Lab No</th>
-          <th>TH(V)</th>
-          <th>TH</th>
-          <th>Ca(V)</th>
-          <th>Ca</th>
-          <th>Mg(V)</th>
-          <th>Mg</th>
-        </tr>
-      </thead>
-      <tbody id="th_table"></tbody>
-    </table>
-  </section>
+    <!-- Tables -->
+    <div class="grid" style="margin-top: 8px;">
+      <div class="card">
+        <h2>Table – TH–Ca–Mg</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Lab No</th>
+              <th>TH(V)</th>
+              <th>TH</th>
+              <th>Ca(V)</th>
+              <th>Ca</th>
+              <th>Mg(V)</th>
+              <th>Mg</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-th"></tbody>
+        </table>
+      </div>
 
-  <!-- Chloride Calculator -->
-  <section>
-    <h2>Chloride Calculator</h2>
-    <label>Enter New Reading (R)</label>
-    <input id="chl_new" class="next-reading">
-    <button id="btn-calc-chl">Calculate</button>
+      <div class="card">
+        <h2>Table – Chloride</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Lab No</th>
+              <th>Chl(V)</th>
+              <th>Chl</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-chl"></tbody>
+        </table>
+      </div>
 
-    <label>Set Previous Reading (P)</label>
-    <input id="chl_prev_set">
-    <button id="btn-set-chl">Update P</button>
+      <div class="card">
+        <h2>Table – Alkalinity</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Lab No</th>
+              <th>Alk(V)</th>
+              <th>Alk</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-alk"></tbody>
+        </table>
+      </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Lab No</th>
-          <th>Chl(V)</th>
-          <th>Chl</th>
-        </tr>
-      </thead>
-      <tbody id="chl_table"></tbody>
-    </table>
-  </section>
+      <div class="card">
+        <h2>Table – TDS</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Lab No</th>
+              <th>TDS</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-tds"></tbody>
+        </table>
+      </div>
+    </div>
 
-  <!-- Alkalinity Calculator -->
-  <section>
-    <h2>Alkalinity Calculator</h2>
-    <label>Enter New Reading (R)</label>
-    <input id="alk_new" class="next-reading">
-    <button id="btn-calc-alk">Calculate</button>
+    <!-- Notes & TODOs for next steps -->
+    <div class="card" style="margin-top: 12px;">
+      <h2>Notes</h2>
+      <ul>
+        <li>Validation (regex ^\d{1,4}\/\d{4}$), calculations (TH/Chl/Alk/TDS), और table rendering <strong>script.js</strong> में अगले step में जोड़े जाएँगे।</li>
+        <li>Firestore integration (save/fetch/overwrite confirm/real-time) बाद के step में add किया जाएगा।</li>
+        <li>PWA: manifest + service-worker registration आख़िर में add होगा।</li>
+      </ul>
+    </div>
+  </div>
 
-    <label>Set Previous Reading (P)</label>
-    <input id="alk_prev_set">
-    <button id="btn-set-alk">Update P</button>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Lab No</th>
-          <th>Alk(V)</th>
-          <th>Alk</th>
-        </tr>
-      </thead>
-      <tbody id="alk_table"></tbody>
-    </table>
-  </section>
-
-  <!-- TDS Calculator -->
-  <section>
-    <h2>TDS Calculator</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Lab No</th>
-          <th>TDS</th>
-        </tr>
-      </thead>
-      <tbody id="tds_table"></tbody>
-    </table>
-  </section>
-
-  <script src="script.js"></script>
+  <!-- अगला step में बनाया जाने वाला JS -->
+  <script src="./script.js"></script>
+  <noscript>Enable JavaScript to use this app.</noscript>
 </body>
 </html>
