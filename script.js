@@ -1,3 +1,8 @@
+// ====== Firebase Imports ======
+import { db } from "./index.js"; 
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+// ====== Base Lab No ======
 // ====== Base Lab No ======
 let baseLabNo = null;
 
@@ -49,6 +54,42 @@ function incrementCount(calcType) {
   else if (calcType === "chl") chlCount++;
   else if (calcType === "alk") alkCount++;
 }
+
+// ====== Save Data to Firestore ======
+async function saveData(labNo) {
+  const data = labData[labNo];
+  if (!data) return;
+
+  try {
+    const docRef = doc(db, "calculations", labNo);
+    const existing = await getDoc(docRef);
+
+    if (existing.exists()) {
+      const overwrite = confirm(`Lab No ${labNo} पहले से मौजूद है। Overwrite करना चाहते हैं?`);
+      if (!overwrite) return;
+    }
+
+    await setDoc(docRef, {
+      lab_no: labNo,
+      th_v: data.th_v || null,
+      th: data.th || null,
+      ca_v: data.ca_v || null,
+      ca: data.ca || null,
+      mg_v: data.mg_v || null,
+      mg: data.mg || null,
+      chl_v: data.chl_v || null,
+      chl: data.chl || null,
+      alk_v: data.alk_v || null,
+      alk: data.alk || null,
+      tds: data.tds || null
+    });
+
+    console.log("✅ Saved:", labNo);
+  } catch (err) {
+    console.error("❌ Error saving:", err);
+  }
+}
+
 
 // ====== TH–Ca–Mg Calculator ======
 function calcTH() {
