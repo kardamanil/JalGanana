@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Titration Calculator by KARDAM</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    section { margin-bottom: 30px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    /* Next reading inputs का color अलग */
+    .next-reading { background-color: #e6f3ff; /* light blue */ border: 1px solid #007bff; }
+  </style>
+</head>
+<body>
+
+  <h1>Titration Calculator by KARDAM</h1>
+
+  <!-- Shared Starting Lab No -->
+  <section>
+    <h3>Starting Lab No (format: xx/yyyy)</h3>
+    <input id="lab_start" placeholder="e.g., 25/2025">
+  </section>
+
+  <!-- Fetch Data by Lab No -->
+  <section>
+    <h3>Fetch Data by Lab No</h3>
+    <input id="fetch_lab_no" placeholder="e.g., 25/2025">
+    <button id="btn-fetch-data">Fetch</button>
+  </section>
+
+  <!-- TH–Ca–Mg Calculator -->
+  <section>
+    <h2>TH–Ca–Mg Calculator</h2>
+    <label>Enter New Reading (R)</label>
+    <input id="th_new" class="next-reading">
+    <button id="btn-calc-th">Calculate</button>
+
+    <label>Set Previous Reading (P)</label>
+    <input id="th_prev_set">
+    <button id="btn-set-th">Update P</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Lab No</th>
+          <th>TH(V)</th>
+          <th>TH</th>
+          <th>Ca(V)</th>
+          <th>Ca</th>
+          <th>Mg(V)</th>
+          <th>Mg</th>
+        </tr>
+      </thead>
+      <tbody id="th_table"></tbody>
+    </table>
+  </section>
+
+  <!-- Chloride Calculator -->
+  <section>
+    <h2>Chloride Calculator</h2>
+    <label>Enter New Reading (R)</label>
+    <input id="chl_new" class="next-reading">
+    <button id="btn-calc-chl">Calculate</button>
+
+    <label>Set Previous Reading (P)</label>
+    <input id="chl_prev_set">
+    <button id="btn-set-chl">Update P</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Lab No</th>
+          <th>Chl(V)</th>
+          <th>Chl</th>
+        </tr>
+      </thead>
+      <tbody id="chl_table"></tbody>
+    </table>
+  </section>
+
+  <!-- Alkalinity Calculator -->
+  <section>
+    <h2>Alkalinity Calculator</h2>
+    <label>Enter New Reading (R)</label>
+    <input id="alk_new" class="next-reading">
+    <button id="btn-calc-alk">Calculate</button>
+
+    <label>Set Previous Reading (P)</label>
+    <input id="alk_prev_set">
+    <button id="btn-set-alk">Update P</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Lab No</th>
+          <th>Alk(V)</th>
+          <th>Alk</th>
+        </tr>
+      </thead>
+      <tbody id="alk_table"></tbody>
+    </table>
+  </section>
+
+  <!-- TDS Calculator -->
+  <section>
+    <h2>TDS Calculator</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Lab No</th>
+          <th>TDS</th>
+        </tr>
+      </thead>
+      <tbody id="tds_table"></tbody>
+    </table>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
