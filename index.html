@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Titration Calculator by ANIL KARDAM</title>
+  <title>Titration Calculator by KARDAM</title>
 
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#007BFF" />
@@ -21,7 +21,7 @@
   </style>
 </head>
 <body>
-  <h1>Titration Calculator by ANIL KARDAM</h1>
+  <h1>Titration Calculator by KARDAM</h1>
 
   <!-- Base Lab No -->
   <div class="card">
@@ -30,49 +30,49 @@
     <button id="btn-apply-lab">Apply Lab No</button>
   </div>
 
-  <!-- TH–Ca–Mg Calculator -->
+  <!-- TH–Ca–Mg -->
   <div class="card">
     <h2>TH–Ca–Mg Calculator</h2>
     <label>Set Previous Reading (P)</label>
-    <input type="number" step="0.1" id="th_prev_set" placeholder="e.g. 0.0" />
+    <input type="number" step="0.1" id="th_prev_set" placeholder="0.0" />
     <button id="btn-set-th">Update P</button>
     <label>Enter New Reading (R)</label>
-    <input type="number" step="0.1" id="th_new" class="next-reading" placeholder="e.g. 12.3" />
+    <input type="number" step="0.1" id="th_new" class="next-reading" />
     <button id="btn-calc-th">Calculate</button>
     <table id="th_table">
       <tr><th>Lab No</th><th>TH(V)</th><th>TH</th><th>Ca(V)</th><th>Ca</th><th>Mg(V)</th><th>Mg</th></tr>
     </table>
   </div>
 
-  <!-- Chloride Calculator -->
+  <!-- Chloride -->
   <div class="card">
     <h2>Chloride Calculator</h2>
     <label>Set Previous Reading (P)</label>
-    <input type="number" step="0.1" id="chl_prev_set" placeholder="e.g. 0.0" />
+    <input type="number" step="0.1" id="chl_prev_set" placeholder="0.0" />
     <button id="btn-set-chl">Update P</button>
     <label>Enter New Reading (R)</label>
-    <input type="number" step="0.1" id="chl_new" class="next-reading" placeholder="e.g. 1.8" />
+    <input type="number" step="0.1" id="chl_new" class="next-reading" />
     <button id="btn-calc-chl">Calculate</button>
     <table id="chl_table">
       <tr><th>Lab No</th><th>Chl(V)</th><th>Chl</th></tr>
     </table>
   </div>
 
-  <!-- Alkalinity Calculator -->
+  <!-- Alkalinity -->
   <div class="card">
     <h2>Alkalinity Calculator</h2>
     <label>Set Previous Reading (P)</label>
-    <input type="number" step="0.1" id="alk_prev_set" placeholder="e.g. 0.0" />
+    <input type="number" step="0.1" id="alk_prev_set" placeholder="0.0" />
     <button id="btn-set-alk">Update P</button>
     <label>Enter New Reading (R)</label>
-    <input type="number" step="0.1" id="alk_new" class="next-reading" placeholder="e.g. 1.5" />
+    <input type="number" step="0.1" id="alk_new" class="next-reading" />
     <button id="btn-calc-alk">Calculate</button>
     <table id="alk_table">
       <tr><th>Lab No</th><th>Alk(V)</th><th>Alk</th></tr>
     </table>
   </div>
 
-  <!-- TDS Table -->
+  <!-- TDS -->
   <div class="card">
     <h2>TDS Calculator (Auto)</h2>
     <table id="tds_table">
@@ -80,40 +80,37 @@
     </table>
   </div>
 
-  <!-- Firebase & Firestore Initialization -->
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDSqffmlg33rpMc6a2JUddg9pYQFvR8aXU",
       authDomain: "labcalc-cee5c.firebaseapp.com",
-      databaseURL: "https://labcalc-cee5c-default-rtdb.firebaseio.com",
       projectId: "labcalc-cee5c",
-      storageBucket: "labcalc-cee5c.firebasestorage.app",
+      storageBucket: "labcalc-cee5c.appspot.com",
       messagingSenderId: "1030109019271",
       appId: "1:1030109019271:web:e66f263a8a1c003b41cc22"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    window.__fb = { db };
-    console.log("✅ Firestore initialized", db);
+    window.__fb = { db }; // expose for script.js
   </script>
 
   <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('service-worker.js').then(
-          function(registration) { console.log('ServiceWorker registration successful:', registration); },
-          function(err) { console.log('ServiceWorker registration failed:', err); }
-        );
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('ServiceWorker registered:', reg))
+          .catch(err => console.log('ServiceWorker failed:', err));
       });
     }
   </script>
 
-  <!-- Main App Logic -->
+  <!-- Main App -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
