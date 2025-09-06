@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Titration Calculator by ANIL KARDAM</title>
+  <title>Titration Calculator by KARDAM</title>
 
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#007BFF" />
   <link rel="icon" href="icon.png" />
+
   <style>
     body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 16px; }
     .card { background: #fff; padding: 14px; margin-bottom: 16px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
     input { width: 100%; padding: 10px; font-size: 16px; margin: 6px 0; border: 1px solid #ccc; border-radius: 8px; }
-    input.next-reading { border: 2px solid #FFC107; } /* amber border for next reading */
+    input.next-reading { border: 2px solid #FFC107; }
     button { padding: 10px; border: none; border-radius: 8px; background: #007BFF; color: #fff; font-size: 16px; width: 100%; margin-top: 8px; }
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
@@ -27,7 +28,6 @@
     <h2>Base Lab No</h2>
     <input type="text" id="lab_no" placeholder="Enter Lab No (x/yyyy)" />
     <button id="btn-apply-lab">Apply Lab No</button>
-    <button id="btn-fetch-lab">Fetch Existing Data</button>
   </div>
 
   <!-- TH–Ca–Mg Calculator -->
@@ -94,12 +94,26 @@
       messagingSenderId: "1030109019271",
       appId: "1:1030109019271:web:e66f263a8a1c003b41cc22"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    window.__fb={db};
+    window.__fb = { db };
     console.log("✅ Firestore initialized", db);
   </script>
 
+  <!-- Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('service-worker.js').then(
+          function(registration) { console.log('ServiceWorker registration successful:', registration); },
+          function(err) { console.log('ServiceWorker registration failed:', err); }
+        );
+      });
+    }
+  </script>
+
+  <!-- Main App Logic -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
