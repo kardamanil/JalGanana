@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Water Calculation WebApp</title>
+  <title>Titration Calculator by ANIL KARDAM</title>
+
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#007BFF" />
   <link rel="icon" href="icon.png" />
@@ -12,7 +12,7 @@
     body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 16px; }
     .card { background: #fff; padding: 14px; margin-bottom: 16px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
     input { width: 100%; padding: 10px; font-size: 16px; margin: 6px 0; border: 1px solid #ccc; border-radius: 8px; }
-    input.highlight { border: 2px solid #FFC107; background-color: #fff8e1; } /* amber highlight */
+    input.next-reading { border: 2px solid #FFC107; } /* amber border for next reading */
     button { padding: 10px; border: none; border-radius: 8px; background: #007BFF; color: #fff; font-size: 16px; width: 100%; margin-top: 8px; }
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
@@ -20,23 +20,26 @@
   </style>
 </head>
 <body>
-  <h1>💧 Water Calculation WebApp</h1>
+  <h1>Titration Calculator by KARDAM</h1>
 
-  <!-- Shared Lab Number -->
+  <!-- Base Lab No -->
   <div class="card">
-    <label>Lab Number (xx/yyyy)</label>
-    <input type="text" id="lab_no" placeholder="e.g. 25/2025">
-    <button onclick="applyLabNo()">Apply Lab No</button>
+    <h2>Base Lab No</h2>
+    <input type="text" id="lab_no" placeholder="Enter Lab No (x/yyyy)" />
+    <button id="btn-apply-lab">Apply Lab No</button>
   </div>
 
   <!-- TH–Ca–Mg Calculator -->
   <div class="card">
     <h2>TH–Ca–Mg Calculator</h2>
-    <label>Previous TH Reading</label>
-    <input type="number" id="th_prev_set" placeholder="0.0">
-    <label>New TH Volume</label>
-    <input type="number" id="th_new" class="highlight" placeholder="New TH Volume">
-    <button onclick="calcTH()">Add TH</button>
+    <label>Enter New Reading (R)</label>
+    <input type="number" step="0.1" id="th_new" class="next-reading" placeholder="e.g. 12.3" />
+    <button id="btn-calc-th">Calculate</button>
+
+    <label>Set Previous Reading (P)</label>
+    <input type="number" step="0.1" id="th_prev_set" placeholder="e.g. 0.0" />
+    <button id="btn-set-th">Update P</button>
+
     <table id="th_table">
       <tr><th>Lab No</th><th>TH(V)</th><th>TH</th><th>Ca(V)</th><th>Ca</th><th>Mg(V)</th><th>Mg</th></tr>
     </table>
@@ -45,33 +48,38 @@
   <!-- Chloride Calculator -->
   <div class="card">
     <h2>Chloride Calculator</h2>
-    <label>Previous Cl Reading</label>
-    <input type="number" id="chl_prev_set" placeholder="0.0">
-    <label>New Cl Volume</label>
-    <input type="number" id="chl_new" class="highlight" placeholder="New Cl Volume">
-    <button onclick="calcChloride()">Add Chloride</button>
+    <label>Enter New Reading (R)</label>
+    <input type="number" step="0.1" id="chl_new" class="next-reading" placeholder="e.g. 1.8" />
+    <button id="btn-calc-chl">Calculate</button>
+
+    <label>Set Previous Reading (P)</label>
+    <input type="number" step="0.1" id="chl_prev_set" placeholder="e.g. 0.0" />
+    <button id="btn-set-chl">Update P</button>
+
     <table id="chl_table">
-      <tr><th>Lab No</th><th>Cl(V)</th><th>Cl</th></tr>
+      <tr><th>Lab No</th><th>Chl(V)</th><th>Chl</th></tr>
     </table>
   </div>
 
   <!-- Alkalinity Calculator -->
   <div class="card">
     <h2>Alkalinity Calculator</h2>
-    <label>Previous Alk Reading</label>
-    <input type="number" id="alk_prev_set" placeholder="0.0">
-    <label>New Alk Volume</label>
-    <input type="number" id="alk_new" class="highlight" placeholder="New Alk Volume">
-    <button onclick="calcAlkalinity()">Add Alkalinity</button>
+    <label>Enter New Reading (R)</label>
+    <input type="number" step="0.1" id="alk_new" class="next-reading" placeholder="e.g. 1.5" />
+    <button id="btn-calc-alk">Calculate</button>
+
+    <label>Set Previous Reading (P)</label>
+    <input type="number" step="0.1" id="alk_prev_set" placeholder="e.g. 0.0" />
+    <button id="btn-set-alk">Update P</button>
+
     <table id="alk_table">
       <tr><th>Lab No</th><th>Alk(V)</th><th>Alk</th></tr>
     </table>
   </div>
 
-  <!-- TDS Calculator -->
+  <!-- TDS Table -->
   <div class="card">
-    <h2>TDS Calculator</h2>
-    <button onclick="calcTDS()">Calculate TDS</button>
+    <h2>TDS Calculator (Auto)</h2>
     <table id="tds_table">
       <tr><th>Lab No</th><th>TDS</th></tr>
     </table>
