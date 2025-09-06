@@ -1,27 +1,19 @@
-// ---------------- Shared Lab Number ----------------
-let currentLabNo = "";   // active lab number
-let labYear = "";        // year part
+let currentLabNo = "";
 
+// ---------------- LAB NO ----------------
 function applyLabNo() {
-  const input = document.getElementById("lab_no").value.trim();
-  const regex = /^\d{1,4}\/\d{4}$/;
-
-  if (!regex.test(input)) {
-    alert("Invalid Lab No format! Please use x/yyyy to xxxx/yyyy");
+  let val = document.getElementById("lab_no").value.trim();
+  let regex = /^\d{1,4}\/\d{4}$/;
+  if (!regex.test(val)) {
+    alert("Lab No format होना चाहिए: x/yyyy या xxxx/yyyy");
     return;
   }
-
-  currentLabNo = input;
-  labYear = input.split("/")[1]; // year fix ho gaya
-  alert("Lab No applied: " + currentLabNo);
+  currentLabNo = val;
+  alert("Applied Lab No: " + currentLabNo);
 }
 
 function nextLabNo() {
-  if (!currentLabNo) {
-    alert("Please apply a valid Lab No first!");
-    return;
-  }
-
+  if (!currentLabNo) { alert("पहले Lab No apply करें"); return; }
   let [num, year] = currentLabNo.split("/");
   num = parseInt(num) + 1;
   currentLabNo = num + "/" + year;
@@ -29,29 +21,20 @@ function nextLabNo() {
   alert("Next Lab No: " + currentLabNo);
 }
 
-// ---------------- TH–Ca–Mg Calculator ----------------
-let th_prev = 0;
-
+// ---------------- TH–Ca–Mg ----------------
 function calcTH() {
-  if (!currentLabNo) {
-    alert("Apply Lab No first!");
-    return;
-  }
+  if (!currentLabNo) { alert("Apply Lab No first!"); return; }
 
+  let prev = parseFloat(document.getElementById("th_prev_set").value) || 0;
   let newReading = parseFloat(document.getElementById("th_new").value);
-  if (isNaN(newReading)) {
-    alert("Enter a valid TH new reading");
-    return;
-  }
 
-  let th_v = newReading - th_prev;
+  if (isNaN(newReading)) { alert("Enter valid TH new reading"); return; }
+
+  let th_v = newReading - prev;
   let th = th_v * 40;
-  let ca_v = th_v / 2;
-  let ca = ca_v * 40;
-  let mg_v = th_v / 2;
-  let mg = mg_v * 40;
+  let ca_v = th_v / 2, ca = ca_v * 40;
+  let mg_v = th_v / 2, mg = mg_v * 40;
 
-  // update table
   let row = `<tr>
     <td>${currentLabNo}</td>
     <td>${th_v.toFixed(2)}</td>
@@ -63,27 +46,20 @@ function calcTH() {
   </tr>`;
   document.getElementById("th_table").innerHTML += row;
 
-  // auto update prev
-  th_prev = newReading;
+  document.getElementById("th_prev_set").value = newReading; // auto update
 }
 
-// ---------------- Chloride Calculator ----------------
-let chl_prev = 0;
+// ---------------- Chloride ----------------
+function calcChloride() {
+  if (!currentLabNo) { alert("Apply Lab No first!"); return; }
 
-function calcChl() {
-  if (!currentLabNo) {
-    alert("Apply Lab No first!");
-    return;
-  }
-
+  let prev = parseFloat(document.getElementById("chl_prev_set").value) || 0;
   let newReading = parseFloat(document.getElementById("chl_new").value);
-  if (isNaN(newReading)) {
-    alert("Enter a valid Chloride new reading");
-    return;
-  }
 
-  let chl_v = newReading - chl_prev;
-  let chl = chl_v * 40;
+  if (isNaN(newReading)) { alert("Enter valid Chloride new reading"); return; }
+
+  let chl_v = newReading - prev;
+  let chl = chl_v * 35.45;
 
   let row = `<tr>
     <td>${currentLabNo}</td>
@@ -92,25 +68,19 @@ function calcChl() {
   </tr>`;
   document.getElementById("chl_table").innerHTML += row;
 
-  chl_prev = newReading;
+  document.getElementById("chl_prev_set").value = newReading; // auto update
 }
 
-// ---------------- Alkalinity Calculator ----------------
-let alk_prev = 0;
+// ---------------- Alkalinity ----------------
+function calcAlkalinity() {
+  if (!currentLabNo) { alert("Apply Lab No first!"); return; }
 
-function calcAlk() {
-  if (!currentLabNo) {
-    alert("Apply Lab No first!");
-    return;
-  }
-
+  let prev = parseFloat(document.getElementById("alk_prev_set").value) || 0;
   let newReading = parseFloat(document.getElementById("alk_new").value);
-  if (isNaN(newReading)) {
-    alert("Enter a valid Alkalinity new reading");
-    return;
-  }
 
-  let alk_v = newReading - alk_prev;
+  if (isNaN(newReading)) { alert("Enter valid Alkalinity new reading"); return; }
+
+  let alk_v = newReading - prev;
   let alk = alk_v * 200;
 
   let row = `<tr>
@@ -120,29 +90,26 @@ function calcAlk() {
   </tr>`;
   document.getElementById("alk_table").innerHTML += row;
 
-  alk_prev = newReading;
+  document.getElementById("alk_prev_set").value = newReading; // auto update
 }
 
-// ---------------- TDS Calculator ----------------
+// ---------------- TDS ----------------
 function calcTDS() {
-  if (!currentLabNo) {
-    alert("Apply Lab No first!");
+  if (!currentLabNo) { alert("Apply Lab No first!"); return; }
+
+  // last TH, Cl, Alk fetch
+  let th_rows = document.querySelectorAll("#th_table tr");
+  let chl_rows = document.querySelectorAll("#chl_table tr");
+  let alk_rows = document.querySelectorAll("#alk_table tr");
+
+  if (th_rows.length < 2 || chl_rows.length < 2 || alk_rows.length < 2) {
+    alert("पहले TH, Cl और Alk add करें");
     return;
   }
 
-  // last row values निकालना
-  let thTable = document.getElementById("th_table").rows;
-  let chlTable = document.getElementById("chl_table").rows;
-  let alkTable = document.getElementById("alk_table").rows;
-
-  if (thTable.length < 2 || chlTable.length < 2 || alkTable.length < 2) {
-    alert("Please calculate TH, Chloride and Alkalinity first!");
-    return;
-  }
-
-  let th = parseFloat(thTable[thTable.length - 1].cells[2].innerText);
-  let chl = parseFloat(chlTable[chlTable.length - 1].cells[2].innerText);
-  let alk = parseFloat(alkTable[alkTable.length - 1].cells[2].innerText);
+  let th = parseFloat(th_rows[th_rows.length - 1].cells[2].innerText);
+  let chl = parseFloat(chl_rows[chl_rows.length - 1].cells[2].innerText);
+  let alk = parseFloat(alk_rows[alk_rows.length - 1].cells[2].innerText);
 
   let tds = th + chl + alk;
 
@@ -151,10 +118,4 @@ function calcTDS() {
     <td>${tds.toFixed(2)}</td>
   </tr>`;
   document.getElementById("tds_table").innerHTML += row;
-}
-
-// ---------------- Firestore Placeholder ----------------
-function fetchLabData() {
-  let labNo = document.getElementById("fetch_lab").value.trim();
-  alert("Fetching from Firestore: " + labNo + " (to be implemented in Step 3)");
 }
