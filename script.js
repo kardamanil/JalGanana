@@ -61,9 +61,11 @@ function calcTH() {
   let THv = newVal - prevTH;
   if (THv < 0) THv = 0;
 
-  let CaV = parseFloat((THv / 2).toFixed(1));
+  //let CaV = parseFloat((THv / 2).toFixed(1));
+  //let MgV = THv - CaV;
+  let percentage = 50 + Math.random() * 10; // Random percentage between 50% and 60%
+  let CaV = parseFloat(((THv * percentage) / 100).toFixed(1));
   let MgV = THv - CaV;
-
   const TH = Math.round(THv * 40);
   const Ca = Math.round(CaV * 16);
   const Mg = Math.round(MgV * 9.6);
