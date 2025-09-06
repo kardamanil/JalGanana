@@ -27,20 +27,18 @@
     <h2>Base Lab No</h2>
     <input type="text" id="lab_no" placeholder="Enter Lab No (x/yyyy)" />
     <button id="btn-apply-lab">Apply Lab No</button>
+    <button id="btn-fetch-lab">Fetch Existing Data</button>
   </div>
 
   <!-- TH–Ca–Mg Calculator -->
   <div class="card">
     <h2>TH–Ca–Mg Calculator</h2>
-
     <label>Set Previous Reading (P)</label>
     <input type="number" step="0.1" id="th_prev_set" placeholder="e.g. 0.0" />
     <button id="btn-set-th">Update P</button>
-
     <label>Enter New Reading (R)</label>
     <input type="number" step="0.1" id="th_new" class="next-reading" placeholder="e.g. 12.3" />
     <button id="btn-calc-th">Calculate</button>
-
     <table id="th_table">
       <tr><th>Lab No</th><th>TH(V)</th><th>TH</th><th>Ca(V)</th><th>Ca</th><th>Mg(V)</th><th>Mg</th></tr>
     </table>
@@ -49,15 +47,12 @@
   <!-- Chloride Calculator -->
   <div class="card">
     <h2>Chloride Calculator</h2>
-
     <label>Set Previous Reading (P)</label>
     <input type="number" step="0.1" id="chl_prev_set" placeholder="e.g. 0.0" />
     <button id="btn-set-chl">Update P</button>
-
     <label>Enter New Reading (R)</label>
     <input type="number" step="0.1" id="chl_new" class="next-reading" placeholder="e.g. 1.8" />
     <button id="btn-calc-chl">Calculate</button>
-
     <table id="chl_table">
       <tr><th>Lab No</th><th>Chl(V)</th><th>Chl</th></tr>
     </table>
@@ -66,15 +61,12 @@
   <!-- Alkalinity Calculator -->
   <div class="card">
     <h2>Alkalinity Calculator</h2>
-
     <label>Set Previous Reading (P)</label>
     <input type="number" step="0.1" id="alk_prev_set" placeholder="e.g. 0.0" />
     <button id="btn-set-alk">Update P</button>
-
     <label>Enter New Reading (R)</label>
     <input type="number" step="0.1" id="alk_new" class="next-reading" placeholder="e.g. 1.5" />
     <button id="btn-calc-alk">Calculate</button>
-
     <table id="alk_table">
       <tr><th>Lab No</th><th>Alk(V)</th><th>Alk</th></tr>
     </table>
@@ -87,13 +79,12 @@
       <tr><th>Lab No</th><th>TDS</th></tr>
     </table>
   </div>
-  <!-- Firebase & Firestore Initialization -->
-   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, onSnapshot } 
-      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-  // Firebase config (aapka project ka details)
+  <!-- Firebase & Firestore Initialization -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyDSqffmlg33rpMc6a2JUddg9pYQFvR8aXU",
       authDomain: "labcalc-cee5c.firebaseapp.com",
@@ -103,17 +94,12 @@
       messagingSenderId: "1030109019271",
       appId: "1:1030109019271:web:e66f263a8a1c003b41cc22"
     };
-// Firebase initialize
     const app = initializeApp(firebaseConfig);
-// Firestore initialize     
     const db = getFirestore(app);
-// Ab db ready hai use karne ke liye
-     window.__fb = { db }; // expose for script.js usage
+    window.__fb={db};
     console.log("✅ Firestore initialized", db);
   </script>
 
-  
-  <!-- Main App Logic -->
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
