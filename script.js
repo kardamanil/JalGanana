@@ -1,11 +1,13 @@
 let currentLabNo = "";
 
-// ---------------- LAB NO ----------------
+let prevTH = 0, prevChl = 0, prevAlk = 0;
+
+// ---------------- Lab No ----------------
 function applyLabNo() {
   let val = document.getElementById("lab_no").value.trim();
   let regex = /^\d{1,4}\/\d{4}$/;
   if (!regex.test(val)) {
-    alert("Lab No format होना चाहिए: x/yyyy या xxxx/yyyy");
+    alert("Invalid Lab No format! Use x/yyyy, xx/yyyy, xxx/yyyy or xxxx/yyyy");
     return;
   }
   currentLabNo = val;
@@ -13,7 +15,7 @@ function applyLabNo() {
 }
 
 function nextLabNo() {
-  if (!currentLabNo) { alert("पहले Lab No apply करें"); return; }
+  if (!currentLabNo) { alert("Apply Lab No first"); return; }
   let [num, year] = currentLabNo.split("/");
   num = parseInt(num) + 1;
   currentLabNo = num + "/" + year;
@@ -24,98 +26,97 @@ function nextLabNo() {
 // ---------------- TH–Ca–Mg ----------------
 function calcTH() {
   if (!currentLabNo) { alert("Apply Lab No first!"); return; }
+  let newVal = parseFloat(document.getElementById("th_new").value);
+  if (isNaN(newVal)) return;
 
-  let prev = parseFloat(document.getElementById("th_prev_set").value) || 0;
-  let newReading = parseFloat(document.getElementById("th_new").value);
+  let THv = newVal - prevTH; if (THv < 0) THv = 0;
+  let CaV = parseFloat((THv/2).toFixed(1));
+  let MgV = THv - CaV;
 
-  if (isNaN(newReading)) { alert("Enter valid TH new reading"); return; }
-
-  let th_v = newReading - prev;
-  let th = th_v * 40;
-  let ca_v = th_v / 2, ca = ca_v * 40;
-  let mg_v = th_v / 2, mg = mg_v * 40;
+  const TH = Math.round(THv*40);
+  const Ca = Math.round(CaV*16);
+  const Mg = Math.round(MgV*9.6);
 
   let row = `<tr>
     <td>${currentLabNo}</td>
-    <td>${th_v.toFixed(2)}</td>
-    <td>${th.toFixed(2)}</td>
-    <td>${ca_v.toFixed(2)}</td>
-    <td>${ca.toFixed(2)}</td>
-    <td>${mg_v.toFixed(2)}</td>
-    <td>${mg.toFixed(2)}</td>
+    <td>${THv.toFixed(1)}</td>
+    <td>${TH}</td>
+    <td>${CaV.toFixed(1)}</td>
+    <td>${Ca}</td>
+    <td>${MgV.toFixed(1)}</td>
+    <td>${Mg}</td>
   </tr>`;
   document.getElementById("th_table").innerHTML += row;
 
-  document.getElementById("th_prev_set").value = newReading; // auto update
+  prevTH = newVal;
+  document.getElementById("th_prev_set").placeholder = prevTH.toFixed(1);
+  document.getElementById("th_new").value = "";
 }
 
 // ---------------- Chloride ----------------
 function calcChloride() {
   if (!currentLabNo) { alert("Apply Lab No first!"); return; }
+  let newVal = parseFloat(document.getElementById("chl_new").value);
+  if (isNaN(newVal)) return;
 
-  let prev = parseFloat(document.getElementById("chl_prev_set").value) || 0;
-  let newReading = parseFloat(document.getElementById("chl_new").value);
-
-  if (isNaN(newReading)) { alert("Enter valid Chloride new reading"); return; }
-
-  let chl_v = newReading - prev;
-  let chl = chl_v * 35.45;
+  let ChlV = newVal - prevChl; if (ChlV < 0) ChlV = 0;
+  const Chl = ChlV*40;
 
   let row = `<tr>
     <td>${currentLabNo}</td>
-    <td>${chl_v.toFixed(2)}</td>
-    <td>${chl.toFixed(2)}</td>
+    <td>${ChlV.toFixed(1)}</td>
+    <td>${Chl.toFixed(1)}</td>
   </tr>`;
   document.getElementById("chl_table").innerHTML += row;
 
-  document.getElementById("chl_prev_set").value = newReading; // auto update
+  prevChl = newVal;
+  document.getElementById("chl_prev_set").placeholder = prevChl.toFixed(1);
+  document.getElementById("chl_new").value = "";
 }
 
 // ---------------- Alkalinity ----------------
 function calcAlkalinity() {
   if (!currentLabNo) { alert("Apply Lab No first!"); return; }
+  let newVal = parseFloat(document.getElementById("alk_new").value);
+  if (isNaN(newVal)) return;
 
-  let prev = parseFloat(document.getElementById("alk_prev_set").value) || 0;
-  let newReading = parseFloat(document.getElementById("alk_new").value);
-
-  if (isNaN(newReading)) { alert("Enter valid Alkalinity new reading"); return; }
-
-  let alk_v = newReading - prev;
-  let alk = alk_v * 200;
+  let AlkV = newVal - prevAlk; if (AlkV < 0) AlkV = 0;
+  const Alk = AlkV*200;
 
   let row = `<tr>
     <td>${currentLabNo}</td>
-    <td>${alk_v.toFixed(2)}</td>
-    <td>${alk.toFixed(2)}</td>
+    <td>${AlkV.toFixed(1)}</td>
+    <td>${Alk.toFixed(1)}</td>
   </tr>`;
   document.getElementById("alk_table").innerHTML += row;
 
-  document.getElementById("alk_prev_set").value = newReading; // auto update
+  prevAlk = newVal;
+  document.getElementById("alk_prev_set").placeholder = prevAlk.toFixed(1);
+  document.getElementById("alk_new").value = "";
 }
 
 // ---------------- TDS ----------------
 function calcTDS() {
   if (!currentLabNo) { alert("Apply Lab No first!"); return; }
 
-  // last TH, Cl, Alk fetch
-  let th_rows = document.querySelectorAll("#th_table tr");
-  let chl_rows = document.querySelectorAll("#chl_table tr");
-  let alk_rows = document.querySelectorAll("#alk_table tr");
+  let thRows = document.querySelectorAll("#th_table tr");
+  let chlRows = document.querySelectorAll("#chl_table tr");
+  let alkRows = document.querySelectorAll("#alk_table tr");
 
-  if (th_rows.length < 2 || chl_rows.length < 2 || alk_rows.length < 2) {
+  if (thRows.length < 2 || chlRows.length < 2 || alkRows.length < 2) {
     alert("पहले TH, Cl और Alk add करें");
     return;
   }
 
-  let th = parseFloat(th_rows[th_rows.length - 1].cells[2].innerText);
-  let chl = parseFloat(chl_rows[chl_rows.length - 1].cells[2].innerText);
-  let alk = parseFloat(alk_rows[alk_rows.length - 1].cells[2].innerText);
+  let TH = parseFloat(thRows[thRows.length-1].cells[2].innerText);
+  let Chl = parseFloat(chlRows[chlRows.length-1].cells[2].innerText);
+  let Alk = parseFloat(alkRows[alkRows.length-1].cells[2].innerText);
 
-  let tds = th + chl + alk;
+  let TDS = TH + Chl + Alk;
 
   let row = `<tr>
     <td>${currentLabNo}</td>
-    <td>${tds.toFixed(2)}</td>
+    <td>${TDS.toFixed(1)}</td>
   </tr>`;
   document.getElementById("tds_table").innerHTML += row;
 }
