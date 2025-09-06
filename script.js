@@ -19,7 +19,7 @@ function applyLabNo() {
   const input = document.getElementById("lab_no").value.trim();
   const regex = /^\d{1,4}\/\d{4}$/;
   if (!regex.test(input)) {
-    alert("Invalid Lab No format! Use x/yyyy, xx/yyyy, xxx/yyyy, or xxxx/yyyy");
+    alert("Invalid Lab No format! Use like 125/2025 i.e. LabNo/Year");
     return;
   }
   baseLabNo = input;
