@@ -127,7 +127,9 @@ async function saveLabData(labNo, data) {
         showLoading('btn-calc-chl', true);
         showLoading('btn-calc-alk', true);
         
-        const docRef = doc(db, "lab_calculations", labNo);
+        // Convert lab number to Firebase-safe document ID (replace / with -)
+        const docId = labNo.replace('/', '-');
+        const docRef = doc(db, "lab_calculations", docId);
         
         // Check if document already exists
         const existing = await getDoc(docRef);
@@ -179,7 +181,9 @@ async function saveLabData(labNo, data) {
 // Fetch single lab data
 async function fetchLabData(labNo) {
     try {
-        const docRef = doc(db, "lab_calculations", labNo);
+        // Convert lab number to Firebase-safe document ID (replace / with -)
+        const docId = labNo.replace('/', '-');
+        const docRef = doc(db, "lab_calculations", docId);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
