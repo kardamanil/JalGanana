@@ -1,7 +1,7 @@
-//import { db } from "./index.js";
+// Firebase imports
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-// Base Lab No
+// Base Lab No & State
 let baseLabNo = null;
 let thCount = 0, chlCount = 0, alkCount = 0;
 let prevTH = 0, prevChl = 0, prevAlk = 0;
@@ -10,10 +10,12 @@ let labData = {};
 // ===== Apply Lab No =====
 function applyLabNo() {
   const input = document.getElementById("lab_no").value.trim();
-  if (!/^\d{1,4}\/\d{4}$/.test(input)) { alert("Invalid Lab No!"); return; }
+  if (!/^\d{1,4}\/\d{4}$/.test(input)) { alert("Invalid Lab No! Format: x/yyyy"); return; }
   baseLabNo = input;
   thCount = chlCount = alkCount = 0;
   labData = {};
+  // Reset all calculators
+  resetTH(); resetChl(); resetAlk(); resetTDS();
   alert("Base Lab No applied: " + baseLabNo);
 }
 
@@ -24,13 +26,17 @@ function getLabNo(type) {
   let count = type==="th"?thCount:type==="chl"?chlCount:alkCount;
   return (parseInt(num)+count)+"/"+year;
 }
-function increment(type){ if(type==="th") thCount++; else if(type==="chl") chlCount++; else alkCount++; }
+function increment(type) {
+  if(type==="th") thCount++;
+  else if(type==="chl") chlCount++;
+  else alkCount++;
+}
 
 // ===== Save to Firestore =====
 async function saveData(labNo) {
   const data = labData[labNo]; if(!data) return;
   try {
-    const ref = doc(db, "calculations", labNo);
+    const ref = doc(__fb.db, "calculations", labNo);
     const existing = await getDoc(ref);
     if(existing.exists()){
       if(!confirm(`Lab No ${labNo} already exists. Overwrite?`)) return;
@@ -99,9 +105,9 @@ function calcAlkalinity(){
 }
 
 // ===== Update Previous =====
-function setPrevTH(){ const v=parseFloat(document.getElementById("th_prev_set").value); if(!isNaN(v)){prevTH=Math.max(v,0);document.getElementById("th_prev_set").value=""; document.getElementById("th_prev_set").placeholder=prevTH.toFixed(1);alert("Previous TH updated: "+prevTH.toFixed(1));}}
-function setPrevChl(){ const v=parseFloat(document.getElementById("chl_prev_set").value); if(!isNaN(v)){prevChl=Math.max(v,0);document.getElementById("chl_prev_set").value=""; document.getElementById("chl_prev_set").placeholder=prevChl.toFixed(1);alert("Previous Chloride updated: "+prevChl.toFixed(1));}}
-function setPrevAlk(){ const v=parseFloat(document.getElementById("alk_prev_set").value); if(!isNaN(v)){prevAlk=Math.max(v,0);document.getElementById("alk_prev_set").value=""; document.getElementById("alk_prev_set").placeholder=prevAlk.toFixed(1);alert("Previous Alkalinity updated: "+prevAlk.toFixed(1));}}
+function setPrevTH(){ const v=parseFloat(document.getElementById("th_prev_set").value); if(!isNaN(v)){prevTH=Math.max(v,0);document.getElementById("th_prev_set").value=""; document.getElementById("th_prev_set").placeholder=prevTH.toFixed(1);} }
+function setPrevChl(){ const v=parseFloat(document.getElementById("chl_prev_set").value); if(!isNaN(v)){prevChl=Math.max(v,0);document.getElementById("chl_prev_set").value=""; document.getElementById("chl_prev_set").placeholder=prevChl.toFixed(1);} }
+function setPrevAlk(){ const v=parseFloat(document.getElementById("alk_prev_set").value); if(!isNaN(v)){prevAlk=Math.max(v,0);document.getElementById("alk_prev_set").value=""; document.getElementById("alk_prev_set").placeholder=prevAlk.toFixed(1);} }
 
 // ===== Update TDS =====
 function updateTDS(labNo){
@@ -113,11 +119,53 @@ function updateTDS(labNo){
   }
 }
 
+// ====== Reset Functions ======
+function resetTH() {
+  prevTH = 0; thCount = 0;
+  document.getElementById("th_prev_set").value = "";
+  document.getElementById("th_prev_set").placeholder = "0.0";
+  document.getElementById("th_new").value = "";
+  // Clear table rows except header
+  let table = document.getElementById("th_table");
+  while(table.rows.length > 1) table.deleteRow(1);
+}
+function resetChl() {
+  prevChl = 0; chlCount = 0;
+  document.getElementById("chl_prev_set").value = "";
+  document.getElementById("chl_prev_set").placeholder = "0.0";
+  document.getElementById("chl_new").value = "";
+  let table = document.getElementById("chl_table");
+  while(table.rows.length > 1) table.deleteRow(1);
+}
+function resetAlk() {
+  prevAlk = 0; alkCount = 0;
+  document.getElementById("alk_prev_set").value = "";
+  document.getElementById("alk_prev_set").placeholder = "0.0";
+  document.getElementById("alk_new").value = "";
+  let table = document.getElementById("alk_table");
+  while(table.rows.length > 1) table.deleteRow(1);
+}
+function resetTDS() {
+  let table = document.getElementById("tds_table");
+  while(table.rows.length > 1) table.deleteRow(1);
+}
+
 // ===== Bind Buttons =====
 document.getElementById("btn-apply-lab").addEventListener("click",applyLabNo);
+
+// TH–Ca–Mg
 document.getElementById("btn-calc-th").addEventListener("click",calcTH);
 document.getElementById("btn-set-th").addEventListener("click",setPrevTH);
+document.getElementById("btn-reset-th").addEventListener("click",resetTH);
+
+// Chloride
 document.getElementById("btn-calc-chl").addEventListener("click",calcChloride);
 document.getElementById("btn-set-chl").addEventListener("click",setPrevChl);
+document.getElementById("btn-reset-chl").addEventListener("click",resetChl);
+
+// Alkalinity
 document.getElementById("btn-calc-alk").addEventListener("click",calcAlkalinity);
 document.getElementById("btn-set-alk").addEventListener("click",setPrevAlk);
+document.getElementById("btn-reset-alk").addEventListener("click",resetAlk);
+
+// No explicit reset for TDS, is auto-calculated, but add clear on lab no/apply
