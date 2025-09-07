@@ -79,6 +79,44 @@ function showLoading(buttonId, isLoading = true) {
     }
 }
 
+// ====== Firebase Connection Test ======
+async function testFirebaseConnection() {
+    try {
+        // Test connection by trying to read from a test document
+        const testDoc = doc(db, "test", "connection");
+        await getDoc(testDoc);
+        window.firebaseConnected = true;
+        updateFirebaseStatus('online');
+        console.log("✅ Firebase connection successful!");
+        return true;
+    } catch (error) {
+        window.firebaseConnected = false;
+        updateFirebaseStatus('offline');
+        console.error("❌ Firebase connection failed:", error);
+        return false;
+    }
+}
+
+// ====== Update Firebase Status in UI ======
+function updateFirebaseStatus(status) {
+    const statusEl = document.getElementById('firebase-status');
+    if (!statusEl) return;
+    
+    if (status === 'online') {
+        statusEl.textContent = '✅ Firebase Connected - Auto-save enabled';
+        statusEl.className = 'firebase-status online';
+    } else if (status === 'offline') {
+        statusEl.textContent = '❌ Firebase Offline - Data will not be saved';
+        statusEl.className = 'firebase-status offline';
+    } else if (status === 'saving') {
+        statusEl.textContent = '💾 Saving to Firebase...';
+        statusEl.className = 'firebase-status';
+    } else {
+        statusEl.textContent = '🔄 Connecting to Firebase...';
+        statusEl.className = 'firebase-status';
+    }
+}
+
 // ====== Firebase Functions ======
 
 // Save single lab data
@@ -526,9 +564,23 @@ document.getElementById("btn-calc-alk").addEventListener("click", calcAlkalinity
 document.getElementById("btn-set-alk").addEventListener("click", setPrevAlk);
 document.getElementById("btn-apply-lab").addEventListener("click", applyLabNo);
 
-// Optional Firebase control buttons (add in HTML if needed)
-// document.getElementById("btn-load-lab").addEventListener("click", loadSingleLab);
-// document.getElementById("btn-export-all").addEventListener("click", exportAllData);
-// document.getElementById("btn-clear-all").addEventListener("click", clearAllData);
+// Firebase control buttons - ACTIVE NOW!
+document.getElementById("btn-load-lab").addEventListener("click", loadSingleLab);
+document.getElementById("btn-export-all").addEventListener("click", exportAllData);
+document.getElementById("btn-clear-all").addEventListener("click", clearAllData);
 
-console.log("🔥 Firebase integrated JalGanana loaded successfully!");
+// ====== Initialize App ======
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log("🔥 Firebase integrated JalGanana loading...");
+    
+    // Test Firebase connection
+    updateFirebaseStatus('connecting');
+    const connected = await testFirebaseConnection();
+    
+    if (connected) {
+        console.log("🎉 JalGanana ready with Firebase integration!");
+    } else {
+        console.log("⚠️ JalGanana loaded but Firebase is offline");
+        showMessage("Firebase connection failed. Data will not be saved automatically.", 'error');
+    }
+});
