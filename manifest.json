@@ -1,6 +1,6 @@
 {
   "name": "Titration Calculator",
-  "short_name": "JalGanana",
+  "short_name": "JalGanana"
   "start_url": "/JalGanana/",
   "display": "standalone",
   "background_color": "#007BFF",
