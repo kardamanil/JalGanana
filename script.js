@@ -1,6 +1,15 @@
 // ====== Firebase Imports ======
 import { db } from "./index.js"; 
-import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { 
+    doc, 
+    setDoc, 
+    getDoc, 
+    getDocs, 
+    collection, 
+    query, 
+    orderBy, 
+    limit 
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 // ====== Constants ======
 const MULTIPLIERS = {
@@ -56,6 +65,149 @@ function validateLabNo(input) {
     return true;
 }
 
+function showLoading(buttonId, isLoading = true) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+        button.disabled = isLoading;
+        button.style.opacity = isLoading ? '0.6' : '1';
+        if (isLoading) {
+            button.originalText = button.textContent;
+            button.textContent = 'Loading...';
+        } else {
+            button.textContent = button.originalText || button.textContent;
+        }
+    }
+}
+
+// ====== Firebase Functions ======
+
+// Save single lab data
+async function saveLabData(labNo, data) {
+    try {
+        updateFirebaseStatus('saving');
+        showLoading('btn-calc-th', true);
+        showLoading('btn-calc-chl', true);
+        showLoading('btn-calc-alk', true);
+        
+        const docRef = doc(db, "lab_calculations", labNo);
+        
+        // Check if document already exists
+        const existing = await getDoc(docRef);
+        if (existing.exists()) {
+            const overwrite = confirm(`⚠️ Lab No ${labNo} पहले से मौजूद है।\n\n📊 Existing data:\nTH: ${existing.data().th || 'N/A'}, Ca: ${existing.data().ca || 'N/A'}, Mg: ${existing.data().mg || 'N/A'}\nChl: ${existing.data().chl || 'N/A'}, Alk: ${existing.data().alk || 'N/A'}, TDS: ${existing.data().tds || 'N/A'}\n\nOverwrite करना चाहते हैं?`);
+            if (!overwrite) {
+                showMessage("Data save cancelled", 'info');
+                updateFirebaseStatus('online');
+                return false;
+            }
+        }
+
+        // Prepare data to save
+        const saveData = {
+            lab_no: labNo,
+            th: data.th || null,
+            th_volume: data.th_v || null,
+            ca: data.ca || null,
+            ca_volume: data.ca_v || null,
+            mg: data.mg || null,
+            mg_volume: data.mg_v || null,
+            chl: data.chl || null,
+            chl_volume: data.chl_v || null,
+            alk: data.alk || null,
+            alk_volume: data.alk_v || null,
+            tds: data.tds || null,
+            created_at: existing.exists() ? existing.data().created_at : new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
+        await setDoc(docRef, saveData);
+        showMessage(`✅ Lab ${labNo} data saved successfully!`, 'success');
+        updateFirebaseStatus('online');
+        console.log("✅ Saved to Firebase:", labNo, saveData);
+        return true;
+
+    } catch (error) {
+        console.error("❌ Firebase Save Error:", error);
+        showMessage(`Error saving data: ${error.message}`, 'error');
+        updateFirebaseStatus('offline');
+        return false;
+    } finally {
+        showLoading('btn-calc-th', false);
+        showLoading('btn-calc-chl', false);
+        showLoading('btn-calc-alk', false);
+    }
+}
+
+// Fetch single lab data
+async function fetchLabData(labNo) {
+    try {
+        const docRef = doc(db, "lab_calculations", labNo);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            showMessage(`✅ Lab ${labNo} data loaded from server!`, 'success');
+            return {
+                lab_no: data.lab_no,
+                th: data.th,
+                th_v: data.th_volume,
+                ca: data.ca,
+                ca_v: data.ca_volume,
+                mg: data.mg,
+                mg_v: data.mg_volume,
+                chl: data.chl,
+                chl_v: data.chl_volume,
+                alk: data.alk,
+                alk_v: data.alk_volume,
+                tds: data.tds
+            };
+        } else {
+            showMessage(`❌ Lab ${labNo} not found in database!`, 'error');
+            return null;
+        }
+    } catch (error) {
+        console.error("❌ Firebase Fetch Error:", error);
+        showMessage(`Error fetching data: ${error.message}`, 'error');
+        return null;
+    }
+}
+
+// Fetch multiple lab data
+async function fetchMultipleLabData(labNos) {
+    try {
+        const results = [];
+        for (const labNo of labNos) {
+            const data = await fetchLabData(labNo);
+            if (data) results.push(data);
+        }
+        return results;
+    } catch (error) {
+        console.error("❌ Fetch Multiple Error:", error);
+        return [];
+    }
+}
+
+// Fetch all lab data (optional - for reports)
+async function fetchAllLabData() {
+    try {
+        showMessage("Loading all lab data...", 'info');
+        const q = query(collection(db, "lab_calculations"), orderBy("created_at", "desc"));
+        const querySnapshot = await getDocs(q);
+        
+        const allData = [];
+        querySnapshot.forEach((doc) => {
+            allData.push(doc.data());
+        });
+        
+        showMessage(`✅ Loaded ${allData.length} lab records!`, 'success');
+        return allData;
+    } catch (error) {
+        console.error("❌ Fetch All Error:", error);
+        showMessage(`Error loading all data: ${error.message}`, 'error');
+        return [];
+    }
+}
+
 // ====== Apply Base Lab No ======
 function applyLabNo() {
     const input = document.getElementById("lab_no").value.trim();
@@ -99,51 +251,8 @@ function incrementCount(calcType) {
     else if (calcType === "alk") alkCount++;
 }
 
-// ====== Save Data to Firestore with Better Error Handling ======
-async function saveData(labNo) {
-    const data = labData[labNo];
-    if (!data) return;
-
-    try {
-        showMessage("Saving data...", 'info');
-        
-        const docRef = doc(db, "calculations", labNo);
-        const existing = await getDoc(docRef);
-
-        if (existing.exists()) {
-            const overwrite = confirm(`Lab No ${labNo} पहले से मौजूद है। Overwrite करना चाहते हैं?`);
-            if (!overwrite) {
-                showMessage("Data save cancelled", 'info');
-                return;
-            }
-        }
-
-        await setDoc(docRef, {
-            lab_no: labNo,
-            th_v: data.th_v || null,
-            th: data.th || null,
-            ca_v: data.ca_v || null,
-            ca: data.ca || null,
-            mg_v: data.mg_v || null,
-            mg: data.mg || null,
-            chl_v: data.chl_v || null,
-            chl: data.chl || null,
-            alk_v: data.alk_v || null,
-            alk: data.alk || null,
-            tds: data.tds || null,
-            timestamp: new Date().toISOString()
-        });
-
-        showMessage(`Data saved successfully for ${labNo}!`, 'success');
-        console.log("✅ Saved:", labNo);
-    } catch (err) {
-        showMessage(`Error saving data: ${err.message}`, 'error');
-        console.error("❌ Error saving:", err);
-    }
-}
-
 // ====== TH–Ca–Mg Calculator ======
-function calcTH() {
+async function calcTH() {
     const labNo = getLabNo("th");
     if (!labNo) { 
         showMessage("Apply Base Lab No first!", 'error'); 
@@ -187,11 +296,13 @@ function calcTH() {
 
     incrementCount("th");
     updateTDS(labNo);
-    saveData(labNo);
+    
+    // Save to Firebase
+    await saveLabData(labNo, labData[labNo]);
 }
 
 // ====== Chloride Calculator ======
-function calcChloride() {
+async function calcChloride() {
     const labNo = getLabNo("chl");
     if (!labNo) { 
         showMessage("Apply Base Lab No first!", 'error'); 
@@ -223,11 +334,13 @@ function calcChloride() {
 
     incrementCount("chl");
     updateTDS(labNo);
-    saveData(labNo);
+    
+    // Save to Firebase
+    await saveLabData(labNo, labData[labNo]);
 }
 
 // ====== Alkalinity Calculator ======
-function calcAlkalinity() {
+async function calcAlkalinity() {
     const labNo = getLabNo("alk");
     if (!labNo) { 
         showMessage("Apply Base Lab No first!", 'error'); 
@@ -259,10 +372,12 @@ function calcAlkalinity() {
 
     incrementCount("alk");
     updateTDS(labNo);
-    saveData(labNo);
+    
+    // Save to Firebase
+    await saveLabData(labNo, labData[labNo]);
 }
 
-// ====== Update Previous Reading Buttons with Better Validation ======
+// ====== Update Previous Reading Buttons ======
 function setPrevTH() {
     const v = parseFloat(document.getElementById("th_prev_set").value);
     if (!validateInput(v, 0, 50)) return;
@@ -312,7 +427,71 @@ function updateTDS(labNo) {
     }
 }
 
-// ====== Clear All Data Function (Optional) ======
+// ====== Load/Fetch Functions for UI ======
+async function loadSingleLab() {
+    const labNo = prompt("Enter Lab No to load (e.g., 125/2025):");
+    if (!labNo || !validateLabNo(labNo)) return;
+    
+    const data = await fetchLabData(labNo);
+    if (data) {
+        displayLoadedData(data);
+    }
+}
+
+function displayLoadedData(data) {
+    // Display in tables
+    if (data.th !== null) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${data.lab_no}</td><td>${data.th_v}</td><td>${data.th}</td>
+                         <td>${data.ca_v}</td><td>${data.ca}</td><td>${data.mg_v}</td><td>${data.mg}</td>`;
+        document.getElementById("th_table").appendChild(row);
+    }
+    
+    if (data.chl !== null) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${data.lab_no}</td><td>${data.chl_v}</td><td>${data.chl}</td>`;
+        document.getElementById("chl_table").appendChild(row);
+    }
+    
+    if (data.alk !== null) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${data.lab_no}</td><td>${data.alk_v}</td><td>${data.alk}</td>`;
+        document.getElementById("alk_table").appendChild(row);
+    }
+    
+    if (data.tds !== null) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${data.lab_no}</td><td>${data.tds}</td>`;
+        document.getElementById("tds_table").appendChild(row);
+    }
+    
+    // Store in memory
+    labData[data.lab_no] = data;
+}
+
+// ====== Export Functions ======
+async function exportAllData() {
+    const allData = await fetchAllLabData();
+    if (allData.length === 0) return;
+    
+    let csvContent = "Lab No,TH,Ca,Mg,Chloride,Alkalinity,TDS\n";
+    allData.forEach(data => {
+        csvContent += `${data.lab_no},${data.th||''},${data.ca||''},${data.mg||''},${data.chl||''},${data.alk||''},${data.tds||''}\n`;
+    });
+    
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lab_data_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showMessage(`✅ ${allData.length} records exported!`, 'success');
+}
+
+// ====== Clear All Data Function ======
 function clearAllData() {
     if (confirm("सभी data clear करना चाहते हैं? यह action undo नहीं हो सकता!")) {
         // Clear tables
@@ -347,5 +526,9 @@ document.getElementById("btn-calc-alk").addEventListener("click", calcAlkalinity
 document.getElementById("btn-set-alk").addEventListener("click", setPrevAlk);
 document.getElementById("btn-apply-lab").addEventListener("click", applyLabNo);
 
-// Optional: Add clear button if needed in HTML
+// Optional Firebase control buttons (add in HTML if needed)
+// document.getElementById("btn-load-lab").addEventListener("click", loadSingleLab);
+// document.getElementById("btn-export-all").addEventListener("click", exportAllData);
 // document.getElementById("btn-clear-all").addEventListener("click", clearAllData);
+
+console.log("🔥 Firebase integrated JalGanana loaded successfully!");
