@@ -4,80 +4,121 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Titration Calculator by KARDAM</title>
-
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#007BFF" />
   <link rel="icon" href="icon.png" />
-
   <style>
-    body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 16px; }
-    .card { background: #fff; padding: 14px; margin-bottom: 16px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-    input { width: 100%; padding: 10px; font-size: 16px; margin: 6px 0; border: 1px solid #ccc; border-radius: 8px; }
+    body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 0; }
+    .container { max-width: 420px; margin: 32px auto; padding: 24px; background: #fff; border-radius: 18px; box-shadow: 0 2px 16px rgba(0,0,0,0.10); }
+    h1 { text-align: center; margin-bottom: 24px; }
+    .tabs { display: flex; margin-bottom: 18px; }
+    .tab-btn {
+      flex: 1; padding: 10px 0; background: #f3f5f9; border: none; border-radius: 8px 8px 0 0;
+      font-size: 16px; cursor: pointer; transition: background 0.2s;
+    }
+    .tab-btn.active { background: #007BFF; color: #fff; font-weight: bold; }
+    .card { padding: 0; margin-bottom: 0; border-radius: 0 0 14px 14px; box-shadow: none; }
+    .section { display: none; padding: 16px 0 0 0; }
+    .section.active { display: block; }
+    label { display: block; margin: 10px 0 4px 0; font-size: 15px; }
+    input { width: 100%; padding: 9px; font-size: 16px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 8px; }
     input.next-reading { border: 2px solid #FFC107; }
-    button { padding: 10px; border: none; border-radius: 8px; background: #007BFF; color: #fff; font-size: 16px; width: 100%; margin-top: 8px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    button { padding: 11px; border: none; border-radius: 8px; background: #007BFF; color: #fff; font-size: 17px; width: 100%; margin: 8px 0; cursor: pointer; }
+    button.reset-btn { background: #aaa; color: #fff; margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+    th, td { border: 1px solid #ddd; padding: 7px; text-align: center; }
     th { background: #f3f5f9; }
+    hr { margin: 18px 0; border: none; border-top: 1px solid #eee; }
+    @media (max-width:480px) {
+      .container { max-width: 98vw; padding: 6vw; }
+      h1 { font-size: 22px; }
+      .tab-btn { font-size: 14px; }
+      input, button { font-size: 15px; }
+    }
   </style>
 </head>
 <body>
-  <h1>Titration Calculator by KARDAM</h1>
+  <div class="container">
+    <h1>Titration Calculator by KARDAM</h1>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="th">TH–Ca–Mg</button>
+      <button class="tab-btn" data-tab="chl">Chloride</button>
+      <button class="tab-btn" data-tab="alk">Alkalinity</button>
+      <button class="tab-btn" data-tab="tds">TDS</button>
+    </div>
 
-  <!-- Base Lab No -->
-  <div class="card">
-    <h2>Base Lab No</h2>
-    <input type="text" id="lab_no" placeholder="Enter Lab No (x/yyyy)" />
-    <button id="btn-apply-lab">Apply Lab No</button>
-  </div>
+    <!-- Base Lab No (always shown) -->
+    <div class="card">
+      <label for="lab_no">Lab No</label>
+      <input type="text" id="lab_no" placeholder="Enter Lab No (x/yyyy)" />
+      <button id="btn-apply-lab">Apply Lab No</button>
+      <hr>
+    </div>
 
-  <!-- TH–Ca–Mg -->
-  <div class="card">
-    <h2>TH–Ca–Mg Calculator</h2>
-    <label>Set Previous Reading (P)</label>
-    <input type="number" step="0.1" id="th_prev_set" placeholder="0.0" />
-    <button id="btn-set-th">Update P</button>
-    <label>Enter New Reading (R)</label>
-    <input type="number" step="0.1" id="th_new" class="next-reading" />
-    <button id="btn-calc-th">Calculate</button>
-    <table id="th_table">
-      <tr><th>Lab No</th><th>TH(V)</th><th>TH</th><th>Ca(V)</th><th>Ca</th><th>Mg(V)</th><th>Mg</th></tr>
-    </table>
-  </div>
+    <!-- TH–Ca–Mg Section -->
+    <div class="section active" id="section-th">
+      <div class="card">
+        <label>Previous Reading (P)</label>
+        <input type="number" step="0.1" id="th_prev_set" placeholder="0.0" />
+        <button id="btn-set-th">Set Previous</button>
+        <label>New Reading (R)</label>
+        <input type="number" step="0.1" id="th_new" class="next-reading" placeholder="0.0" />
+        <button id="btn-calc-th">Calculate</button>
+        <button id="btn-reset-th" class="reset-btn">Reset</button>
+        <table id="th_table">
+          <tr>
+            <th>Lab No</th><th>TH(V)</th><th>TH</th><th>Ca(V)</th><th>Ca</th><th>Mg(V)</th><th>Mg</th>
+          </tr>
+        </table>
+      </div>
+    </div>
 
-  <!-- Chloride -->
-  <div class="card">
-    <h2>Chloride Calculator</h2>
-    <label>Set Previous Reading (P)</label>
-    <input type="number" step="0.1" id="chl_prev_set" placeholder="0.0" />
-    <button id="btn-set-chl">Update P</button>
-    <label>Enter New Reading (R)</label>
-    <input type="number" step="0.1" id="chl_new" class="next-reading" />
-    <button id="btn-calc-chl">Calculate</button>
-    <table id="chl_table">
-      <tr><th>Lab No</th><th>Chl(V)</th><th>Chl</th></tr>
-    </table>
-  </div>
+    <!-- Chloride Section -->
+    <div class="section" id="section-chl">
+      <div class="card">
+        <label>Previous Reading (P)</label>
+        <input type="number" step="0.1" id="chl_prev_set" placeholder="0.0" />
+        <button id="btn-set-chl">Set Previous</button>
+        <label>New Reading (R)</label>
+        <input type="number" step="0.1" id="chl_new" class="next-reading" placeholder="0.0" />
+        <button id="btn-calc-chl">Calculate</button>
+        <button id="btn-reset-chl" class="reset-btn">Reset</button>
+        <table id="chl_table">
+          <tr>
+            <th>Lab No</th><th>Chl(V)</th><th>Chl</th>
+          </tr>
+        </table>
+      </div>
+    </div>
 
-  <!-- Alkalinity -->
-  <div class="card">
-    <h2>Alkalinity Calculator</h2>
-    <label>Set Previous Reading (P)</label>
-    <input type="number" step="0.1" id="alk_prev_set" placeholder="0.0" />
-    <button id="btn-set-alk">Update P</button>
-    <label>Enter New Reading (R)</label>
-    <input type="number" step="0.1" id="alk_new" class="next-reading" />
-    <button id="btn-calc-alk">Calculate</button>
-    <table id="alk_table">
-      <tr><th>Lab No</th><th>Alk(V)</th><th>Alk</th></tr>
-    </table>
-  </div>
+    <!-- Alkalinity Section -->
+    <div class="section" id="section-alk">
+      <div class="card">
+        <label>Previous Reading (P)</label>
+        <input type="number" step="0.1" id="alk_prev_set" placeholder="0.0" />
+        <button id="btn-set-alk">Set Previous</button>
+        <label>New Reading (R)</label>
+        <input type="number" step="0.1" id="alk_new" class="next-reading" placeholder="0.0" />
+        <button id="btn-calc-alk">Calculate</button>
+        <button id="btn-reset-alk" class="reset-btn">Reset</button>
+        <table id="alk_table">
+          <tr>
+            <th>Lab No</th><th>Alk(V)</th><th>Alk</th>
+          </tr>
+        </table>
+      </div>
+    </div>
 
-  <!-- TDS -->
-  <div class="card">
-    <h2>TDS Calculator (Auto)</h2>
-    <table id="tds_table">
-      <tr><th>Lab No</th><th>TDS</th></tr>
-    </table>
+    <!-- TDS Section -->
+    <div class="section" id="section-tds">
+      <div class="card">
+        <table id="tds_table">
+          <tr>
+            <th>Lab No</th><th>TDS</th>
+          </tr>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- Firebase -->
@@ -96,7 +137,7 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    window.__fb = { db }; // expose for script.mjs
+    window.__fb = { db }; // expose for script.js
   </script>
 
   <!-- Service Worker -->
@@ -110,7 +151,21 @@
     }
   </script>
 
-  <!-- Main App -->
+  <!-- Tabs JS -->
+  <script>
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const sections = document.querySelectorAll('.section');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        sections.forEach(sec => sec.classList.remove('active'));
+        document.getElementById('section-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+
+  <!-- Main App (same as before; update for reset buttons if needed) -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
