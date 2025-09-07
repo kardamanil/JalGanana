@@ -83,7 +83,7 @@ function showLoading(buttonId, isLoading = true) {
 async function testFirebaseConnection() {
     try {
         // Test connection by trying to read from a test document
-        const testDoc = doc(db, "test", "connection");
+        const testDoc = doc(db, "test", "connection-test");
         await getDoc(testDoc);
         window.firebaseConnected = true;
         updateFirebaseStatus('online');
