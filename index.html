@@ -96,7 +96,7 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    window.__fb = { db }; // expose for script.js
+    window.__fb = { db }; // expose for script.mjs
   </script>
 
   <!-- Service Worker -->
@@ -111,6 +111,6 @@
   </script>
 
   <!-- Main App -->
-  <script type="module" src="script.js"></script>
+  <script type="module" src="script.mjs"></script>
 </body>
 </html>
