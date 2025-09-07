@@ -52,11 +52,46 @@
     button:active {
       background: #004085;
     }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    button.success {
+      background: #28a745;
+    }
+    button.success:hover {
+      background: #218838;
+    }
+    button.warning {
+      background: #ffc107;
+      color: #212529;
+    }
+    button.warning:hover {
+      background: #e0a800;
+    }
     button.danger {
       background: #dc3545;
     }
     button.danger:hover {
       background: #c82333;
+    }
+    button.info {
+      background: #17a2b8;
+    }
+    button.info:hover {
+      background: #138496;
+    }
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .button-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
     }
     table { 
       width: 100%; 
@@ -73,9 +108,21 @@
       background: #f3f5f9; 
       font-weight: bold;
     }
-    .loading {
-      opacity: 0.7;
-      pointer-events: none;
+    .firebase-status {
+      background: #e3f2fd;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      text-align: center;
+    }
+    .firebase-status.online {
+      background: #e8f5e8;
+      color: #2e7d32;
+    }
+    .firebase-status.offline {
+      background: #ffebee;
+      color: #c62828;
     }
     @media (max-width: 768px) {
       body {
@@ -88,28 +135,51 @@
         padding: 6px;
         font-size: 12px;
       }
+      .button-row {
+        grid-template-columns: 1fr;
+      }
+      .button-row-3 {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Titration Calculator by KARDAM</h1>
+  <h1>🧪 JalGanana - Firebase Edition</h1>
+  
+  <!-- Firebase Connection Status -->
+  <div id="firebase-status" class="firebase-status">
+    🔄 Connecting to Firebase...
+  </div>
 
   <!-- Base Lab No -->
   <div class="card">
-    <h2>Base Lab No</h2>
-    <input type="text" id="lab_no" placeholder="Enter Lab No (x/yyyy)" />
+    <h2>📋 Base Lab No</h2>
+    <input type="text" id="lab_no" placeholder="Enter Lab No (125/2025)" />
     <button id="btn-apply-lab">Apply Lab No</button>
+  </div>
+
+  <!-- Firebase Controls -->
+  <div class="card">
+    <h2>☁️ Firebase Controls</h2>
+    <div class="button-row-3">
+      <button id="btn-load-lab" class="info">Load Lab Data</button>
+      <button id="btn-export-all" class="success">Export All CSV</button>
+      <button id="btn-clear-all" class="danger">Clear All</button>
+    </div>
   </div>
 
   <!-- TH–Ca–Mg Calculator -->
   <div class="card">
-    <h2>TH–Ca–Mg Calculator</h2>
+    <h2>🔬 TH–Ca–Mg Calculator</h2>
     <label>Set Previous Reading (P)</label>
-    <input type="number" step="0.1" id="th_prev_set" placeholder="e.g. 0.0" />
-    <button id="btn-set-th">Update P</button>
+    <input type="number" step="0.1" id="th_prev_set" placeholder="0.0" />
+    <button id="btn-set-th" class="warning">Update P</button>
+    
     <label>Enter New Reading (R)</label>
     <input type="number" step="0.1" id="th_new" class="next-reading" placeholder="e.g. 12.3" />
-    <button id="btn-calc-th">Calculate</button>
+    <button id="btn-calc-th">Calculate & Save</button>
+    
     <table id="th_table">
       <tr><th>Lab No</th><th>TH(V)</th><th>TH</th><th>Ca(V)</th><th>Ca</th><th>Mg(V)</th><th>Mg</th></tr>
     </table>
@@ -117,13 +187,15 @@
 
   <!-- Chloride Calculator -->
   <div class="card">
-    <h2>Chloride Calculator</h2>
+    <h2>🧂 Chloride Calculator</h2>
     <label>Set Previous Reading (P)</label>
-    <input type="number" step="0.1" id="chl_prev_set" placeholder="e.g. 0.0" />
-    <button id="btn-set-chl">Update P</button>
+    <input type="number" step="0.1" id="chl_prev_set" placeholder="0.0" />
+    <button id="btn-set-chl" class="warning">Update P</button>
+    
     <label>Enter New Reading (R)</label>
     <input type="number" step="0.1" id="chl_new" class="next-reading" placeholder="e.g. 1.8" />
-    <button id="btn-calc-chl">Calculate</button>
+    <button id="btn-calc-chl">Calculate & Save</button>
+    
     <table id="chl_table">
       <tr><th>Lab No</th><th>Chl(V)</th><th>Chl</th></tr>
     </table>
@@ -131,13 +203,15 @@
 
   <!-- Alkalinity Calculator -->
   <div class="card">
-    <h2>Alkalinity Calculator</h2>
+    <h2>⚗️ Alkalinity Calculator</h2>
     <label>Set Previous Reading (P)</label>
-    <input type="number" step="0.1" id="alk_prev_set" placeholder="e.g. 0.0" />
-    <button id="btn-set-alk">Update P</button>
+    <input type="number" step="0.1" id="alk_prev_set" placeholder="0.0" />
+    <button id="btn-set-alk" class="warning">Update P</button>
+    
     <label>Enter New Reading (R)</label>
     <input type="number" step="0.1" id="alk_new" class="next-reading" placeholder="e.g. 1.5" />
-    <button id="btn-calc-alk">Calculate</button>
+    <button id="btn-calc-alk">Calculate & Save</button>
+    
     <table id="alk_table">
       <tr><th>Lab No</th><th>Alk(V)</th><th>Alk</th></tr>
     </table>
@@ -145,18 +219,24 @@
 
   <!-- TDS Table -->
   <div class="card">
-    <h2>TDS Calculator (Auto)</h2>
+    <h2>📊 TDS Calculator (Auto)</h2>
     <table id="tds_table">
       <tr><th>Lab No</th><th>TDS</th></tr>
     </table>
   </div>
 
-  <!-- Optional Clear All Button -->
-  <!-- 
+  <!-- Instructions -->
   <div class="card">
-    <button id="btn-clear-all" class="danger">Clear All Data</button>
+    <h2>📖 Instructions</h2>
+    <ul style="text-align: left; padding-left: 20px;">
+      <li><strong>Base Lab No:</strong> Format: 125/2025 (LabNo/Year)</li>
+      <li><strong>Auto Save:</strong> Data automatically saves to Firebase after each calculation</li>
+      <li><strong>Load Data:</strong> Fetch specific lab data from Firebase</li>
+      <li><strong>Export All:</strong> Download all data as CSV file</li>
+      <li><strong>Duplicate Override:</strong> App will ask before overwriting existing lab data</li>
+      <li><strong>Ca Percentage:</strong> Automatically calculated between 50-60% of TH</li>
+    </ul>
   </div>
-  -->
 
   <!-- Firebase Initialization -->
   <script type="module" src="index.js"></script>
@@ -164,19 +244,53 @@
   <!-- Main App Logic -->
   <script type="module" src="script.js"></script>
 
-  <!-- Service Worker for PWA - Single Registration -->
+  <!-- Service Worker for PWA -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('service-worker.js')
         .then(registration => {
           console.log('✅ ServiceWorker registered successfully:', registration);
+          updateFirebaseStatus('online');
         })
         .catch(err => {
           console.log('❌ ServiceWorker registration failed:', err);
+          updateFirebaseStatus('offline');
         });
       });
     }
+
+    // Update Firebase connection status
+    function updateFirebaseStatus(status) {
+      const statusEl = document.getElementById('firebase-status');
+      if (status === 'online') {
+        statusEl.textContent = '✅ Firebase Connected - Data will be saved automatically';
+        statusEl.className = 'firebase-status online';
+      } else if (status === 'offline') {
+        statusEl.textContent = '❌ Firebase Disconnected - Data will not be saved';
+        statusEl.className = 'firebase-status offline';
+      } else {
+        statusEl.textContent = '🔄 Connecting to Firebase...';
+        statusEl.className = 'firebase-status';
+      }
+    }
+
+    // Check Firebase connection on load
+    window.addEventListener('load', function() {
+      // Test Firebase connection
+      setTimeout(() => {
+        try {
+          // This will be set by the main script
+          if (window.firebaseConnected) {
+            updateFirebaseStatus('online');
+          } else {
+            updateFirebaseStatus('offline');
+          }
+        } catch (error) {
+          updateFirebaseStatus('offline');
+        }
+      }, 2000);
+    });
   </script>
 </body>
 </html>
