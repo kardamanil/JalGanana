@@ -1,11 +1,11 @@
 const CACHE_NAME = "jalganana-cache-v1";
-const BASE = "/JalGanana/";
-
 const urlsToCache = [
-  `${BASE}`,
-  `${BASE}index.html`,
-  `${BASE}script.js`,
-  `${BASE}manifest.json`
+  "/JalGanana/",
+  "/JalGanana/index.html",
+  "/JalGanana/script.js",
+  "/JalGanana/index.js",
+  "/JalGanana/manifest.json",
+  "/JalGanana/icon.png"
 ];
 
 self.addEventListener("install", event => {
@@ -16,6 +16,6 @@ self.addEventListener("install", event => {
 
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(resp => resp || fetch(event.request))
+    caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
