@@ -3,12 +3,12 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/12.2.1/firebase
 
 // Firebase config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDSqffmlg33rpMc6a2JUddg9pYQFvR8aXU",
+  authDomain: "labcalc-cee5c.firebaseapp.com",
+  projectId: "labcalc-cee5c",
+  storageBucket: "labcalc-cee5c.firebasestorage.app",
+  messagingSenderId: "1030109019271",
+  appId: "1:1030109019271:web:e66f263a8a1c003b41cc22",
 };
 
 // Initialize Firebase
