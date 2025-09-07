@@ -1,4 +1,4 @@
-import { db } from "./index.js";
+import { db } from "./index.html";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 // Base Lab No
