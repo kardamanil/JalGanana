@@ -2,15 +2,15 @@
   "name": "JalGanana - Titration Calculator",
   "short_name": "JalGanana",
   "description": "Water analysis calculator: TH, Ca, Mg, Chloride, Alkalinity & TDS",
-  "start_url": ".",
-  "scope": ".",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "theme_color": "#007BFF",
   "background_color": "#f6f7fb",
   "orientation": "portrait",
   "icons": [
     {
-      "src":"icon.png",
+      "src": "icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
