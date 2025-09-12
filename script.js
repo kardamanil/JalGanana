@@ -103,13 +103,13 @@ function updateFirebaseStatus(status) {
     if (!statusEl) return;
     
     if (status === 'online') {
-        statusEl.textContent = '✅ Firebase Connected - Auto-save enabled';
+        statusEl.textContent = '✅ Firebase Connected - Ready for submit';
         statusEl.className = 'firebase-status online';
     } else if (status === 'offline') {
-        statusEl.textContent = '❌ Firebase Offline - Data will not be saved';
+        statusEl.textContent = '❌ Firebase Offline - Cannot submit data';
         statusEl.className = 'firebase-status offline';
     } else if (status === 'saving') {
-        statusEl.textContent = '💾 Saving to Firebase...';
+        statusEl.textContent = '💾 Submitting to Firebase...';
         statusEl.className = 'firebase-status';
     } else {
         statusEl.textContent = '🔄 Connecting to Firebase...';
@@ -122,11 +122,6 @@ function updateFirebaseStatus(status) {
 // Save single lab data
 async function saveLabData(labNo, data) {
     try {
-        updateFirebaseStatus('saving');
-        showLoading('btn-calc-th', true);
-        showLoading('btn-calc-chl', true);
-        showLoading('btn-calc-alk', true);
-        
         // Convert lab number to Firebase-safe document ID (replace / with -)
         const docId = labNo.replace('/', '-');
         const docRef = doc(db, "lab_calculations", docId);
@@ -136,8 +131,6 @@ async function saveLabData(labNo, data) {
         if (existing.exists()) {
             const overwrite = confirm(`⚠️ Lab No ${labNo} पहले से मौजूद है।\n\n📊 Existing data:\nTH: ${existing.data().th || 'N/A'}, Ca: ${existing.data().ca || 'N/A'}, Mg: ${existing.data().mg || 'N/A'}\nChl: ${existing.data().chl || 'N/A'}, Alk: ${existing.data().alk || 'N/A'}, TDS: ${existing.data().tds || 'N/A'}\n\nOverwrite करना चाहते हैं?`);
             if (!overwrite) {
-                showMessage("Data save cancelled", 'info');
-                updateFirebaseStatus('online');
                 return false;
             }
         }
@@ -161,20 +154,12 @@ async function saveLabData(labNo, data) {
         };
 
         await setDoc(docRef, saveData);
-        showMessage(`✅ Lab ${labNo} data saved successfully!`, 'success');
-        updateFirebaseStatus('online');
         console.log("✅ Saved to Firebase:", labNo, saveData);
         return true;
 
     } catch (error) {
         console.error("❌ Firebase Save Error:", error);
-        showMessage(`Error saving data: ${error.message}`, 'error');
-        updateFirebaseStatus('offline');
         return false;
-    } finally {
-        showLoading('btn-calc-th', false);
-        showLoading('btn-calc-chl', false);
-        showLoading('btn-calc-alk', false);
     }
 }
 
@@ -268,6 +253,9 @@ function applyLabNo() {
     // Reset previous readings
     prevTH = prevChl = prevAlk = 0.0;
     
+    // Update submit button count
+    updateSubmitButtonCount();
+    
     showMessage("Base Lab No applied: " + baseLabNo, 'success');
 }
 
@@ -294,7 +282,7 @@ function incrementCount(calcType) {
 }
 
 // ====== TH–Ca–Mg Calculator ======
-async function calcTH() {
+function calcTH() {
     const labNo = getLabNo("th");
     if (!labNo) { 
         showMessage("Apply Base Lab No first!", 'error'); 
@@ -338,13 +326,11 @@ async function calcTH() {
 
     incrementCount("th");
     updateTDS(labNo);
-    
-    // Save to Firebase
-   // await saveLabData(labNo, labData[labNo]);
+    updateSubmitButtonCount();
 }
 
 // ====== Chloride Calculator ======
-async function calcChloride() {
+function calcChloride() {
     const labNo = getLabNo("chl");
     if (!labNo) { 
         showMessage("Apply Base Lab No first!", 'error'); 
@@ -376,13 +362,11 @@ async function calcChloride() {
 
     incrementCount("chl");
     updateTDS(labNo);
-    
-    // Save to Firebase
-   // await saveLabData(labNo, labData[labNo]);
+    updateSubmitButtonCount();
 }
 
 // ====== Alkalinity Calculator ======
-async function calcAlkalinity() {
+function calcAlkalinity() {
     const labNo = getLabNo("alk");
     if (!labNo) { 
         showMessage("Apply Base Lab No first!", 'error'); 
@@ -414,9 +398,7 @@ async function calcAlkalinity() {
 
     incrementCount("alk");
     updateTDS(labNo);
-    
-    // Save to Firebase
-  //  await saveLabData(labNo, labData[labNo]);
+    updateSubmitButtonCount();
 }
 
 // ====== Update Previous Reading Buttons ======
@@ -469,6 +451,61 @@ function updateTDS(labNo) {
     }
 }
 
+// ====== Update Submit Button Count ======
+function updateSubmitButtonCount() {
+    const submitBtn = document.getElementById("btn-submit-all");
+    if (submitBtn) {
+        const count = Object.keys(labData).length;
+        if (count > 0) {
+            submitBtn.textContent = `Submit All Data (${count} labs)`;
+            submitBtn.disabled = false;
+            submitBtn.style.backgroundColor = '#28a745';
+        } else {
+            submitBtn.textContent = 'Submit All Data (0 labs)';
+            submitBtn.disabled = true;
+            submitBtn.style.backgroundColor = '#6c757d';
+        }
+    }
+}
+
+// ====== Submit All Data Function ======
+async function submitAllData() {
+    if (Object.keys(labData).length === 0) {
+        showMessage("कोई data submit करने के लिए नहीं है!", 'error');
+        return;
+    }
+    
+    const confirmation = confirm(`${Object.keys(labData).length} lab records Firebase में submit करना चाहते हैं?`);
+    if (!confirmation) return;
+    
+    let successCount = 0;
+    let errorCount = 0;
+    
+    updateFirebaseStatus('saving');
+    showLoading('btn-submit-all', true);
+    showMessage("Submitting all data to Firebase...", 'info');
+    
+    // Submit each lab data
+    for (const [labNo, data] of Object.entries(labData)) {
+        const success = await saveLabData(labNo, data);
+        if (success) {
+            successCount++;
+        } else {
+            errorCount++;
+        }
+    }
+    
+    // Show final result
+    if (errorCount === 0) {
+        showMessage(`सभी ${successCount} records successfully submit हो गए!`, 'success');
+    } else {
+        showMessage(`${successCount} records submit हुए, ${errorCount} में error आई`, 'error');
+    }
+    
+    updateFirebaseStatus('online');
+    showLoading('btn-submit-all', false);
+}
+
 // ====== Load/Fetch Functions for UI ======
 async function loadSingleLab() {
     const labNo = prompt("Enter Lab No to load (e.g., 125/2025):");
@@ -509,6 +546,7 @@ function displayLoadedData(data) {
     
     // Store in memory
     labData[data.lab_no] = data;
+    updateSubmitButtonCount();
 }
 
 // ====== Export Functions ======
@@ -555,6 +593,7 @@ function clearAllData() {
         document.getElementById("alk_prev_set").placeholder = "0.0";
         
         baseLabNo = null;
+        updateSubmitButtonCount();
         showMessage("All data cleared!", 'success');
     }
 }
@@ -568,10 +607,11 @@ document.getElementById("btn-calc-alk").addEventListener("click", calcAlkalinity
 document.getElementById("btn-set-alk").addEventListener("click", setPrevAlk);
 document.getElementById("btn-apply-lab").addEventListener("click", applyLabNo);
 
-// Firebase control buttons - ACTIVE NOW!
+// Firebase control buttons
 document.getElementById("btn-load-lab").addEventListener("click", loadSingleLab);
 document.getElementById("btn-export-all").addEventListener("click", exportAllData);
 document.getElementById("btn-clear-all").addEventListener("click", clearAllData);
+document.getElementById("btn-submit-all").addEventListener("click", submitAllData);
 
 // ====== Initialize App ======
 document.addEventListener('DOMContentLoaded', async function() {
@@ -587,4 +627,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.log("⚠️ JalGanana loaded but Firebase is offline");
         showMessage("Firebase connection failed. Data will not be saved automatically.", 'error');
     }
+    
+    // Initialize submit button
+    updateSubmitButtonCount();
 });
