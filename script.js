@@ -268,6 +268,7 @@ function applyLabNo() {
     // Reset previous readings
     prevTH = prevChl = prevAlk = 0.0;
     
+    
     showMessage("Base Lab No applied: " + baseLabNo, 'success');
 }
 
@@ -340,7 +341,7 @@ async function calcTH() {
     updateTDS(labNo);
     
     // Save to Firebase
-   // await saveLabData(labNo, labData[labNo]);
+    await saveLabData(labNo, labData[labNo]);
 }
 
 // ====== Chloride Calculator ======
@@ -378,7 +379,7 @@ async function calcChloride() {
     updateTDS(labNo);
     
     // Save to Firebase
-   // await saveLabData(labNo, labData[labNo]);
+    await saveLabData(labNo, labData[labNo]);
 }
 
 // ====== Alkalinity Calculator ======
@@ -416,7 +417,7 @@ async function calcAlkalinity() {
     updateTDS(labNo);
     
     // Save to Firebase
-  //  await saveLabData(labNo, labData[labNo]);
+    await saveLabData(labNo, labData[labNo]);
 }
 
 // ====== Update Previous Reading Buttons ======
