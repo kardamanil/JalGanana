@@ -352,7 +352,7 @@ async function calcChloride() {
     }
 
     const newVal = parseFloat(document.getElementById("chl_new").value);
-    if (!validateInput(newVal, 0, 20)) return;
+    if (!validateInput(newVal, 0, 100)) return;
 
     let ChlV = newVal - prevChl;
     if (ChlV < 0) {
