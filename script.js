@@ -422,7 +422,7 @@ async function calcAlkalinity() {
 // ====== Update Previous Reading Buttons ======
 function setPrevTH() {
     const v = parseFloat(document.getElementById("th_prev_set").value);
-    if (!validateInput(v, 0, 50)) return;
+    if (!validateInput(v, 0, 100)) return;
     
     prevTH = v;
     document.getElementById("th_prev_set").value = "";
@@ -432,7 +432,7 @@ function setPrevTH() {
 
 function setPrevChl() {
     const v = parseFloat(document.getElementById("chl_prev_set").value);
-    if (!validateInput(v, 0, 20)) return;
+    if (!validateInput(v, 0, 100)) return;
     
     prevChl = v;
     document.getElementById("chl_prev_set").value = "";
@@ -442,7 +442,7 @@ function setPrevChl() {
 
 function setPrevAlk() {
     const v = parseFloat(document.getElementById("alk_prev_set").value);
-    if (!validateInput(v, 0, 10)) return;
+    if (!validateInput(v, 0, 100)) return;
     
     prevAlk = v;
     document.getElementById("alk_prev_set").value = "";
