@@ -302,7 +302,7 @@ async function calcTH() {
     }
 
     const newVal = parseFloat(document.getElementById("th_new").value);
-    if (!validateInput(newVal, 0, 50)) return;
+    if (!validateInput(newVal, 0, 100)) return;
 
     let THv = newVal - prevTH;
     if (THv < 0) {
