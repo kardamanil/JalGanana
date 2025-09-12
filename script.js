@@ -390,7 +390,7 @@ async function calcAlkalinity() {
     }
 
     const newVal = parseFloat(document.getElementById("alk_new").value);
-    if (!validateInput(newVal, 0, 10)) return;
+    if (!validateInput(newVal, 0, 100)) return;
 
     let AlkV = newVal - prevAlk;
     if (AlkV < 0) {
